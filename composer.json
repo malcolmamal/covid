@@ -1,0 +1,9 @@
+{
+    "name": "malcolmamal/covid",
+	"description": "parsing of official covid data and generating a processed spreadsheet",
+    "license": "MIT",
+    "require": {        
+	"php-ai/php-ml": "^0.8.0",
+	"phpoffice/phpexcel": ">=1.8.2"
+    }
+}
