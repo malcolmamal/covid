@@ -162,7 +162,7 @@ class ExcelGenerator extends Generator
 		parent::setGenerateMode($generateMode);
 
 		$generateCharts = true;
-		if ($generateMode === Generator::GENERATE_FOR_ALL)
+		if ($generateMode === Consts::GENERATE_FOR_ALL)
 		{
 			$generateCharts = false;
 		}

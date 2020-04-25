@@ -20,4 +20,11 @@ class Consts
 	const TYPE_RECOVERED_INCREASE = self::TYPE_RECOVERED . self::INCREASE_SUFFIX;
 
 	const TYPE_TRENDS = 'trends';
+
+	const GENERATE_FOR_ALL = 'all';
+	const GENERATE_FOR_MAIN = 'main';
+	const GENERATE_FOR_TEST = 'test';
+
+	const COMMAND_GENERATE = 'generate';
+	const COMMAND_DOWNLOAD = 'download';
 }

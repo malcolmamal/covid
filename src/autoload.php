@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+require_once 'version.php';
+
 require __DIR__ . '/../vendor/autoload.php';
 
 spl_autoload_register('covidAutoload');

@@ -1,7 +1,9 @@
 <?php declare(strict_types=1);
 
 namespace Covid\Input;
+
 use Covid\Consts;
+use Covid\Exception\FileException;
 use Covid\Util\Util;
 
 /**
@@ -62,10 +64,18 @@ class InputHandler
 	/**
 	 * @param string $filePath
 	 * @param string $type
+	 *
+	 * @throws FileException
 	 */
 	private function readCsvFile(string $filePath, string $type): void
 	{
 		$row = 1;
+
+		if (!file_exists($filePath))
+		{
+			throw new FileException('File not found: ' . $filePath . '. Try running the download command first.');
+		}
+
 		if (($handle = fopen($filePath, "r")) !== false)
 		{
 			while (($csvData = fgetcsv($handle, 1000, ",")) !== false)

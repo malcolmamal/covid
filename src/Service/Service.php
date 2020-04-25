@@ -2,6 +2,7 @@
 
 namespace Covid\Service;
 
+use Covid\Consts;
 use Covid\Input\Data;
 use Covid\Input\InputHandler;
 use Covid\Output\Generator;
@@ -27,8 +28,9 @@ class Service
 	 * Service constructor.
 	 *
 	 * @param Generator $generator
+	 * @param bool $downloadFiles
 	 */
-	public function __construct(Generator $generator)
+	public function __construct(Generator $generator, bool $downloadFiles = false)
 	{
 		$this->generator = $generator;
 		$this->data = new Data();
@@ -36,7 +38,10 @@ class Service
 
 		$this->inputHandler = new InputHandler();
 
-		$this->inputHandler->downloadCsvFiles();
+		if ($downloadFiles)
+		{
+			$this->inputHandler->downloadCsvFiles();
+		}
 	}
 
 	/**
@@ -61,7 +66,7 @@ class Service
 	 */
 	public function setAll(): self
 	{
-		$this->generator->setGenerateMode(Generator::GENERATE_FOR_ALL);
+		$this->generator->setGenerateMode(Consts::GENERATE_FOR_ALL);
 
 		return $this;
 	}
@@ -73,7 +78,7 @@ class Service
 	 */
 	public function setMain(): self
 	{
-		$this->generator->setGenerateMode(Generator::GENERATE_FOR_MAIN);
+		$this->generator->setGenerateMode(Consts::GENERATE_FOR_MAIN);
 
 		return $this;
 	}
@@ -85,7 +90,7 @@ class Service
 	 */
 	public function setTest(): self
 	{
-		$this->generator->setGenerateMode(Generator::GENERATE_FOR_TEST);
+		$this->generator->setGenerateMode(Consts::GENERATE_FOR_TEST);
 
 		return $this;
 	}

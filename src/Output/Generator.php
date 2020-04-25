@@ -2,20 +2,17 @@
 
 namespace Covid\Output;
 
+use Covid\Consts;
 use Covid\Input\Data;
 use Covid\Input\InputHandler;
 use DateTimeImmutable;
 
 abstract class Generator
 {
-	const GENERATE_FOR_ALL = 'all';
-	const GENERATE_FOR_MAIN = 'main';
-	const GENERATE_FOR_TEST = 'test';
-
 	/**
 	 * @var string
 	 */
-	protected $generateMode = self::GENERATE_FOR_MAIN;
+	protected $generateMode = Consts::GENERATE_FOR_MAIN;
 
 	/**
 	 * @var Data
@@ -67,15 +64,15 @@ abstract class Generator
 	{
 		switch ($this->generateMode)
 		{
-			case self::GENERATE_FOR_ALL:
+			case Consts::GENERATE_FOR_ALL:
 			{
 				return $this->data->getCountryNames();
 			}
-			case self::GENERATE_FOR_TEST:
+			case Consts::GENERATE_FOR_TEST:
 			{
 				return $this->data->getTestCountryNames();
 			}
-			case self::GENERATE_FOR_MAIN:
+			case Consts::GENERATE_FOR_MAIN:
 			default:
 			{
 				return $this->data->getMainCountryNames();
