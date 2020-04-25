@@ -30,10 +30,11 @@ abstract class Generator
 
 	/**
 	 * @param string $generateMode
+	 * @param bool $withCharts
 	 *
 	 * @return Generator
 	 */
-	public function setGenerateMode(string $generateMode): Generator
+	public function setGenerateMode(string $generateMode, bool $withCharts = false): Generator
 	{
 		$this->generateMode = $generateMode;
 

@@ -6,21 +6,12 @@ use Covid\Input\Data;
 use Covid\Output\Generator;
 use Covid\Consts;
 use Covid\Util\Util;
-use PHPExcel;
-use PHPExcel_CachedObjectStorageFactory;
-use PHPExcel_Cell_DataType;
-use PHPExcel_Chart;
-use PHPExcel_Chart_DataSeries;
-use PHPExcel_Chart_DataSeriesValues;
-use PHPExcel_Chart_Legend;
-use PHPExcel_Chart_PlotArea;
-use PHPExcel_Chart_Title;
-use PHPExcel_IOFactory;
-use PHPExcel_Settings;
-use PHPExcel_Style_Fill;
-use PHPExcel_Style_NumberFormat;
-use PHPExcel_Worksheet;
-use PHPExcel_Writer_Abstract;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class ExcelGenerator extends Generator
 {
@@ -70,27 +61,14 @@ class ExcelGenerator extends Generator
 	const FORMATTING_TYPE_NUMERIC = 'numeric';
 	const FORMATTING_TYPE_PERCENTAGE = 'percentage';
 
-	const NUMBER_FORMAT = '###,###,###';
+	const NUMBER_FORMAT = '###,###,###'; // alternatively: '#,##0'
 
 	const MAIN_SHEET_NAME = 'Main';
-	const CHART_CAPTION_CASES = 'Cases';
-	const CHART_TITLE_ALL_COUNTRIES = 'Total cases for all countries';
-	const CHART_TITLE_FOR_COUNTRY = 'Cases for ';
 
 	/**
-	 * @var PHPExcel
+	 * @var Spreadsheet
 	 */
 	private $document;
-
-	/**
-	 * @var array
-	 */
-	private $mainDataSeriesLabels = [];
-
-	/**
-	 * @var array
-	 */
-	private $mainDataSeriesValues = [];
 
 	/**
 	 * @var bool
@@ -98,43 +76,22 @@ class ExcelGenerator extends Generator
 	private $generateCharts = false;
 
 	/**
-	 * Creates an empty excel file.
-	 *
-	 * @return PHPExcel
+	 * @var ChartGenerator
 	 */
-	public function createNewFile()
-	{
-		PHPExcel_Settings::setCacheStorageMethod(
-			PHPExcel_CachedObjectStorageFactory::cache_in_memory_gzip
-		);
-
-		// Create new PHPExcel object
-		return new PHPExcel();
-	}
-
-	/**
-	 * Sends a created excel file to the browser.
-	 * @param PHPExcel $phpExcelFile - excel document
-	 * @param string $fileName - file name
-	 */
-	public function sendExcelFile($phpExcelFile, $fileName)
-	{
-		$writer = PHPExcel_IOFactory::createWriter($phpExcelFile, 'Excel2007');
-		// We'll be outputting an excel file
-		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-		// It will be called file.xls
-		header('Content-Disposition: attachment;filename="'.$fileName.'.xlsx"');
-		// Write file to the browser
-		$writer->save('php://output');
-	}
+	private $chartGenerator;
 
 	/**
 	 * Generate the Excel file
 	 */
 	public function generate(): void
 	{
-		$this->document = $this->createNewFile();
+		$this->document = new Spreadsheet();
 		$this->document->getActiveSheet()->setTitle(self::MAIN_SHEET_NAME);
+
+		if ($this->generateCharts)
+		{
+			$this->chartGenerator = new ChartGenerator($this->document);
+		}
 
 		foreach ($this->getCountriesForGeneration() as $country)
 		{
@@ -144,7 +101,7 @@ class ExcelGenerator extends Generator
 
 		if ($this->generateCharts)
 		{
-			$this->generateChartForAllCountries();
+			$this->chartGenerator->generateChartForAllCountries();
 		}
 
 		$this->document->setActiveSheetIndexByName(Data::COUNTRY_POLAND);
@@ -154,19 +111,19 @@ class ExcelGenerator extends Generator
 
 	/**
 	 * @param string $generateMode
+	 * @param bool $withCharts
 	 *
 	 * @return Generator
 	 */
-	public function setGenerateMode(string $generateMode): Generator
+	public function setGenerateMode(string $generateMode, bool $withCharts = false): Generator
 	{
 		parent::setGenerateMode($generateMode);
 
-		$generateCharts = true;
 		if ($generateMode === Consts::GENERATE_FOR_ALL)
 		{
-			$generateCharts = false;
+			$withCharts = false;
 		}
-		$this->setGenerateCharts($generateCharts);
+		$this->setGenerateCharts($withCharts);
 
 		return $this;
 	}
@@ -178,11 +135,13 @@ class ExcelGenerator extends Generator
 	{
 		$fileName = $this->prepareOutputFileName();
 
-		/**
-		 * @var $excelWriter PHPExcel_Writer_Abstract
-		 */
-		$excelWriter = PHPExcel_IOFactory::createWriter($this->document, 'Excel2007');
-		$excelWriter->setIncludeCharts(TRUE);
+		$excelWriter = new Xlsx($this->document);
+
+		if ($this->generateCharts)
+		{
+			$excelWriter->setIncludeCharts(true);
+		}
+
 		$excelWriter->save($fileName);
 
 		$this->outputPath = $fileName;
@@ -199,9 +158,9 @@ class ExcelGenerator extends Generator
 	/**
 	 * @param string $country
 	 *
-	 * @return PHPExcel_Worksheet
+	 * @return Worksheet
 	 */
-	private function createSheet(string $country): PHPExcel_Worksheet
+	private function createSheet(string $country): Worksheet
 	{
 		$sheet = $this->document->createSheet();
 		$sheet->setTitle($country);
@@ -308,7 +267,7 @@ class ExcelGenerator extends Generator
 
 		if ($this->generateCharts)
 		{
-			$this->generateChartForCountry($country, $row);
+			$this->chartGenerator->generateChartForCountry($country, $row);
 		}
 	}
 
@@ -325,105 +284,12 @@ class ExcelGenerator extends Generator
 	}
 
 	/**
-	 * @param array $dataSeriesLabels
-	 * @param array $xAxisTickValues
-	 * @param array $dataSeriesValues
-	 * @param string $title
-	 *
-	 * @return PHPExcel_Chart
-	 */
-	private function generateChart(array $dataSeriesLabels, array $xAxisTickValues, array $dataSeriesValues, string $title): PHPExcel_Chart
-	{
-		$series = new PHPExcel_Chart_DataSeries(
-			PHPExcel_Chart_DataSeries::TYPE_SCATTERCHART,
-			null,
-			range(0, count($dataSeriesValues)-1),
-			$dataSeriesLabels,
-			$xAxisTickValues,
-			$dataSeriesValues,
-			null,
-			null,
-			PHPExcel_Chart_DataSeries::STYLE_MARKER
-		);
-
-		$chart = new PHPExcel_Chart(
-			'chart',
-			new PHPExcel_Chart_Title($title),
-			new PHPExcel_Chart_Legend(PHPExcel_Chart_Legend::POSITION_RIGHT, null, false),
-			new PHPExcel_Chart_PlotArea(null, array($series)),
-			true,
-			0,
-			null,
-			new PHPExcel_Chart_Title(self::CHART_CAPTION_CASES)
-		);
-
-		return $chart;
-	}
-
-	/**
-	 * @param string $country
-	 * @param int $lastRow
-	 */
-	private function generateChartForCountry(string $country, int $lastRow): void
-	{
-		$range = $lastRow - 1; // excel range
-		$entries = $lastRow - 2; // quantity
-
-		$this->mainDataSeriesLabels[] = new PHPExcel_Chart_DataSeriesValues('String', null, null, 1, [$country]);
-		$this->mainDataSeriesValues[] = new PHPExcel_Chart_DataSeriesValues('Number', "'" . $country . "'" . '!$B$2:$B$' . $range, null, $entries);
-
-		$dataSeriesLabels = [
-			new PHPExcel_Chart_DataSeriesValues('String', "'" . $country . "'" . '!$B$1', null, 1),
-			new PHPExcel_Chart_DataSeriesValues('String', "'" . $country . "'" . '!$C$1', null, 1),
-			new PHPExcel_Chart_DataSeriesValues('String', "'" . $country . "'" . '!$D$1', null, 1),
-		];
-
-		$xAxisTickValues = [
-			new PHPExcel_Chart_DataSeriesValues('String', "'" . $country . "'" . '!$A$2:$A$' . $range, null, $entries),
-		];
-
-		$dataSeriesValues = [
-			new PHPExcel_Chart_DataSeriesValues('Number', "'" . $country . "'" . '!$B$2:$B$' . $range, null, $entries),
-			new PHPExcel_Chart_DataSeriesValues('Number', "'" . $country . "'" . '!$C$2:$C$' . $range, null, $entries),
-			new PHPExcel_Chart_DataSeriesValues('Number', "'" . $country . "'" . '!$D$2:$D$' . $range, null, $entries),
-		];
-
-		$chart = $this->generateChart(
-			$dataSeriesLabels, $xAxisTickValues, $dataSeriesValues,
-			self::CHART_TITLE_FOR_COUNTRY . $country
-		);
-
-		$chart->setTopLeftPosition('O3');
-		$chart->setBottomRightPosition('AM30');
-
-		$this->document->getActiveSheet()->addChart($chart);
-	}
-
-	/**
-	 * One big chart with all countries in it
-	 */
-	private function generateChartForAllCountries(): void
-	{
-		$chart = $this->generateChart(
-			$this->mainDataSeriesLabels, [], $this->mainDataSeriesValues,
-			self::CHART_TITLE_ALL_COUNTRIES
-		);
-
-		$chart->setTopLeftPosition('B2');
-		$chart->setBottomRightPosition('AC58');
-
-		$this->document->setActiveSheetIndexByName(self::MAIN_SHEET_NAME);
-
-		$this->document->getActiveSheet()->addChart($chart);
-	}
-
-	/**
 	 * @param string $columnKey
 	 * @param int $row
 	 * @param $value
 	 * @param string $dataType
 	 */
-	private function writeCellValue(string $columnKey, int $row, $value, $dataType = PHPExcel_Cell_DataType::TYPE_STRING): void
+	private function writeCellValue(string $columnKey, int $row, $value, $dataType = DataType::TYPE_STRING): void
 	{
 		$this->document->getActiveSheet()->setCellValueExplicitByColumnAndRow($this->getColumnNumber($columnKey), $row, $value, $dataType);
 	}
@@ -435,11 +301,11 @@ class ExcelGenerator extends Generator
 	 * @param array $trends
 	 * @param string $formatting
 	 */
-	private function writeCellNumberValue(string $columnKey, int $row, $value, array $trends = [], $formatting = self::FORMATTING_TYPE_NUMERIC): void
+	private function writeCellNumberValue(string $columnKey, int $row, $value, array $trends = [], string $formatting = self::FORMATTING_TYPE_NUMERIC): void
 	{
-		$this->writeCellValue($columnKey, $row, $value, PHPExcel_Cell_DataType::TYPE_NUMERIC);
+		$this->writeCellValue($columnKey, $row, $value, DataType::TYPE_NUMERIC);
 
-		$cellCoordinates = $this->getColumnNumberInExcelFormat($columnKey, $offsetBecauseOfInconsistency = 1) . $row;
+		$cellCoordinates = $this->getColumnNumberInExcelFormat($columnKey) . $row;
 
 		switch ($formatting)
 		{
@@ -469,10 +335,7 @@ class ExcelGenerator extends Generator
 	private function applyPercentageFormatting(string $cellCoordinates): void
 	{
 		$this->document->getActiveSheet()->getStyle($cellCoordinates)
-			->getNumberFormat()->applyFromArray([
-					'code' => PHPExcel_Style_NumberFormat::FORMAT_PERCENTAGE_00
-				]
-			);
+			->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE_00);
 	}
 
 	/**
@@ -496,14 +359,9 @@ class ExcelGenerator extends Generator
 			return;
 		}
 
-		$this->document->getActiveSheet()->getStyle($cellCoordinates)->applyFromArray(
-			[
-				'fill' => [
-					'type' => PHPExcel_Style_Fill::FILL_SOLID,
-					'color' => ['rgb' => self::TREND_BACKGROUND_COLORS[$trend]]
-				]
-			]
-		);
+		$this->document->getActiveSheet()->getStyle($cellCoordinates)
+			->getFill()->setFillType(Fill::FILL_SOLID)
+			->getStartColor()->setARGB(self::TREND_BACKGROUND_COLORS[$trend]);
 	}
 
 	/**
@@ -528,18 +386,17 @@ class ExcelGenerator extends Generator
 	 */
 	private function getColumnNumber(string $column): int
 	{
-		return self::COLUMNS[$column] - 1; // because rows start from 1 but columns start from 0, really fucking nice :-)
+		return self::COLUMNS[$column];
 	}
 
 	/**
 	 * @param string $column
-	 * @param int $increaseBy
 	 *
 	 * @return string
 	 */
-	private function getColumnNumberInExcelFormat(string $column, $increaseBy = 0): string
+	private function getColumnNumberInExcelFormat(string $column): string
 	{
-		return self::convertColumnNumberToExcelFormat($this->getColumnNumber($column) + $increaseBy);
+		return self::convertColumnNumberToExcelFormat($this->getColumnNumber($column));
 	}
 
 	/**
@@ -549,9 +406,11 @@ class ExcelGenerator extends Generator
 	 */
 	public static function convertColumnNumberToExcelFormat(int $number): string
 	{
-		if (!isset($GLOBALS['column_number_to_excel_column_name_mapping']) || !Util::validArray($GLOBALS['column_number_to_excel_column_name_mapping']))
+		if (!isset($GLOBALS['column_number_to_excel_column_name_mapping'])
+			|| !Util::validArray($GLOBALS['column_number_to_excel_column_name_mapping'])
+		)
 		{
-			$GLOBALS['column_number_to_excel_column_name_mapping'] = array(
+			$GLOBALS['column_number_to_excel_column_name_mapping'] = [
 				'1'  => 'A', '2' => 'B', '3' => 'C', '4' => 'D',
 				'5'  => 'E', '6' => 'F', '7' => 'G', '8' => 'H',
 				'9'  => 'I', '10' => 'J', '11' => 'K', '12' => 'L',
@@ -559,7 +418,7 @@ class ExcelGenerator extends Generator
 				'17' => 'Q', '18' => 'R', '19' => 'S', '20' => 'T',
 				'21' => 'U', '22' => 'V', '23' => 'W', '24' => 'X',
 				'25' => 'Y', '26' => 'Z'
-			);
+			];
 		}
 		$letters = $GLOBALS['column_number_to_excel_column_name_mapping'];
 

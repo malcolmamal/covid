@@ -1,4 +1,4 @@
-<?php  declare(strict_types=1);
+<?php declare(strict_types=1);
 
 namespace Covid\Util\Command;
 
@@ -22,7 +22,7 @@ class GenerateCommand extends Command
 	}
 
 	/**
-	 *
+	 * Configuration
 	 */
 	protected function configure()
 	{
@@ -31,6 +31,7 @@ class GenerateCommand extends Command
 			->setHelp('Generates covid data')
 			->addOption('mode', 'm', InputOption::VALUE_OPTIONAL, '', Consts::GENERATE_FOR_MAIN)
 			->addOption('download', 'd', InputOption::VALUE_NONE, true)
+			->addOption('with-charts', 'c', InputOption::VALUE_NONE, true)
 		;
 	}
 
@@ -52,7 +53,10 @@ class GenerateCommand extends Command
 		}
 
 		$service = (new Service((
-			new ExcelGenerator())->setGenerateMode($input->getOption('mode')))
+			new ExcelGenerator())->setGenerateMode(
+				$input->getOption('mode'),
+				$input->getOption('with-charts')
+			))
 		);
 		$service->generateOutput();
 
