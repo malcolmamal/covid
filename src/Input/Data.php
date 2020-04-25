@@ -234,9 +234,9 @@ class Data
 	 * @param string $day
 	 * @param string $avgType
 	 *
-	 * @return float
+	 * @return int
 	 */
-	public function getRollingAverageValue(string $country, string $type, string $day, string $avgType): float
+	public function getRollingAverageValue(string $country, string $type, string $day, string $avgType): int
 	{
 		if (empty($this->rollingAverages[$country][$type][$day][$avgType]))
 		{

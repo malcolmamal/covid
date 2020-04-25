@@ -32,7 +32,7 @@ class GenerateCommand extends Command
 			->addOption('mode', 'm', InputOption::VALUE_OPTIONAL, '', Consts::GENERATE_FOR_MAIN)
 			->addOption('download', 'd', InputOption::VALUE_NONE)
 			->addOption('with-charts', 'c', InputOption::VALUE_NONE)
-			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL, '',Consts::DAYS_AVG_TYPE_WEEK)
+			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL, '', Consts::DAYS_AVG_TYPE_WEEK)
 		;
 	}
 
