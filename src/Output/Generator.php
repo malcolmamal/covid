@@ -19,6 +19,11 @@ abstract class Generator
 	 */
 	protected $data;
 
+	/**
+	 * @var string
+	 */
+	protected $outputPath;
+
 	abstract public function generate();
 
 	abstract protected function saveData();
@@ -86,5 +91,13 @@ abstract class Generator
 	protected function getBaseFileName(): string
 	{
 		return InputHandler::DATA_DIR . 'covid_' . $this->generateMode . '_' . date('Y-m-d');
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getOutputPath(): string
+	{
+		return $this->outputPath;
 	}
 }

@@ -184,6 +184,8 @@ class ExcelGenerator extends Generator
 		$excelWriter = PHPExcel_IOFactory::createWriter($this->document, 'Excel2007');
 		$excelWriter->setIncludeCharts(TRUE);
 		$excelWriter->save($fileName);
+
+		$this->outputPath = $fileName;
 	}
 
 	/**

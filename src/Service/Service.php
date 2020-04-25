@@ -60,6 +60,14 @@ class Service
 	}
 
 	/**
+	 * @return string
+	 */
+	public function getOutputPath(): string
+	{
+		return $this->generator->getOutputPath();
+	}
+
+	/**
 	 * all countries but no charts because it goes boom
 	 *
 	 * @return Service

@@ -56,6 +56,8 @@ class GenerateCommand extends Command
 		);
 		$service->generateOutput();
 
+		$output->writeln('Generated file located at ' . $service->getOutputPath());
+
 		return 0;
 	}
 }
