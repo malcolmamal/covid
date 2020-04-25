@@ -7,7 +7,7 @@ Tool that fetches official covid data, parses them and generates a prepared outp
 
 ## Requirements
 
-- PHP  ^7.1)
+- PHP ^7.1
 
 ## Download
 
