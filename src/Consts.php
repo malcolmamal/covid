@@ -27,4 +27,5 @@ class Consts
 
 	const COMMAND_GENERATE = 'generate';
 	const COMMAND_DOWNLOAD = 'download';
+	const COMMAND_TEST = 'test';
 }
