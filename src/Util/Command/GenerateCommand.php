@@ -30,8 +30,9 @@ class GenerateCommand extends Command
 			->setDescription('Generate data')
 			->setHelp('Generates covid data')
 			->addOption('mode', 'm', InputOption::VALUE_OPTIONAL, '', Consts::GENERATE_FOR_MAIN)
-			->addOption('download', 'd', InputOption::VALUE_NONE, true)
-			->addOption('with-charts', 'c', InputOption::VALUE_NONE, true)
+			->addOption('download', 'd', InputOption::VALUE_NONE)
+			->addOption('with-charts', 'c', InputOption::VALUE_NONE)
+			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL, '',Consts::DAYS_AVG_TYPE_WEEK)
 		;
 	}
 
@@ -55,7 +56,8 @@ class GenerateCommand extends Command
 		$service = (new Service((
 			new ExcelGenerator())->setGenerateMode(
 				$input->getOption('mode'),
-				$input->getOption('with-charts')
+				$input->getOption('with-charts'),
+				$input->getOption('avg')
 			))
 		);
 		$service->generateOutput();

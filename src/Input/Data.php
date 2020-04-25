@@ -21,6 +21,8 @@ class Data
 	const COUNTRY_BRAZIL = 'Brazil';
 	const COUNTRY_RUSSIA = 'Russia';
 	const COUNTRY_JAPAN = 'Japan';
+	const COUNTRY_INDIA = 'India';
+	const COUNTRY_ISRAEL = 'Israel';
 
 	const TREND_POSITIVE = 'positive';
 	const TREND_NEGATIVE = 'negative';
@@ -109,6 +111,11 @@ class Data
 	private $excelFriendly = false;
 
 	/**
+	 * @var string
+	 */
+	private $averageType = Consts::DAYS_AVG_TYPE_WEEK;
+
+	/**
 	 * @var int
 	 */
 	private $columns = 0;
@@ -117,6 +124,11 @@ class Data
 	 * @var array
 	 */
 	private $trends = [];
+
+	/**
+	 * @var RollingAverageData[]
+	 */
+	private $rollingAverages = [];
 
 	/**
 	 * @param array $dataRow
@@ -149,6 +161,10 @@ class Data
 		$previous = 0;
 		$previousDay = 0;
 		$previousIncrease = 0;
+		$previousAverage = 0;
+
+		$rollingAverage = new RollingAverageData();
+		$this->rollingAverages[$country][$type] = [];
 
 		$array = $type;
 		$arrayDay = $array . 'Day';
@@ -165,15 +181,29 @@ class Data
 			$this->$arrayDay[$country][$day] = $currentDay;
 			$this->$arrayIncrease[$country][$day] = $currentIncrease;
 
+			$rollingAverage->addValue($currentDay);
+			$currentAverage = $rollingAverage->getAverageForType($this->averageType);
+			$this->rollingAverages[$country][$type][$day][$this->averageType] = $currentAverage;
+
 			$this->applyTrends(
-				$country, $day, $type,
-				$currentDay, $previousDay,
+				$country, $day, $type, Consts::DAY_SUFFIX,
+				$currentDay, $previousDay
+			);
+
+			$this->applyTrends(
+				$country, $day, $type, Consts::INCREASE_SUFFIX,
 				$currentIncrease, $previousIncrease
+			);
+
+			$this->applyTrends(
+				$country, $day, $type, Consts::AVERAGE_SUFFIX,
+				$currentAverage, $previousAverage
 			);
 
 			$previous = $current;
 			$previousDay = $currentDay;
 			$previousIncrease = $currentIncrease;
+			$previousAverage = $currentAverage;
 		}
 	}
 
@@ -196,6 +226,24 @@ class Data
 		$increasePercentage = $increase / $originalValue;
 
 		return $increasePercentage;
+	}
+
+	/**
+	 * @param string $country
+	 * @param string $type
+	 * @param string $day
+	 * @param string $avgType
+	 *
+	 * @return float
+	 */
+	public function getRollingAverageValue(string $country, string $type, string $day, string $avgType): float
+	{
+		if (empty($this->rollingAverages[$country][$type][$day][$avgType]))
+		{
+			return 0;
+		}
+
+		return $this->rollingAverages[$country][$type][$day][$avgType];
 	}
 
 	/**
@@ -357,6 +405,8 @@ class Data
 			self::COUNTRY_BRAZIL,
 			self::COUNTRY_RUSSIA,
 			self::COUNTRY_JAPAN,
+			self::COUNTRY_INDIA,
+			self::COUNTRY_ISRAEL,
 		];
 	}
 
@@ -427,15 +477,13 @@ class Data
 	 * @param string $country
 	 * @param string $day
 	 * @param string $type
-	 * @param int $currentDay
-	 * @param int $previousDay
-	 * @param float $currentIncrease
-	 * @param float $previousIncrease
+	 * @param string $valueType
+	 * @param int|float $current
+	 * @param int|float $previous
 	 */
 	private function applyTrends(
-		string $country, string $day, string $type,
-		int $currentDay, int $previousDay,
-		float $currentIncrease, float $previousIncrease
+		string $country, string $day, string $type, string $valueType,
+		$current, $previous
 	): void
 	{
 		$positive = self::TREND_POSITIVE;
@@ -448,14 +496,9 @@ class Data
 			$negative = self::TREND_POSITIVE;
 		}
 
-		if ($previousDay != 0 || $currentDay != 0)
+		if ($previous != 0 || $current != 0)
 		{
-			$this->trends[$country][$day][$type . Consts::DAY_SUFFIX] = ($currentDay > $previousDay) ? $positive : $negative;
-		}
-
-		if ($previousIncrease != 0 || $currentIncrease != 0)
-		{
-			$this->trends[$country][$day][$type . Consts::INCREASE_SUFFIX] = ($currentIncrease > $previousIncrease) ? $positive : $negative;
+			$this->trends[$country][$day][$type . $valueType] = ($current > $previous) ? $positive : $negative;
 		}
 	}
 
@@ -474,5 +517,17 @@ class Data
 		}
 
 		return '';
+	}
+
+	/**
+	 * @param string $averageType
+	 *
+	 * @return Data
+	 */
+	public function setAverageType(string $averageType): self
+	{
+		$this->averageType = $averageType;
+
+		return $this;
 	}
 }

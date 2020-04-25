@@ -15,6 +15,11 @@ abstract class Generator
 	protected $generateMode = Consts::GENERATE_FOR_MAIN;
 
 	/**
+	 * @var string
+	 */
+	protected $averageType = Consts::DAYS_AVG_TYPE_WEEK;
+
+	/**
 	 * @var Data
 	 */
 	protected $data;
@@ -31,10 +36,13 @@ abstract class Generator
 	/**
 	 * @param string $generateMode
 	 * @param bool $withCharts
+	 * @param string $averageType
 	 *
 	 * @return Generator
 	 */
-	public function setGenerateMode(string $generateMode, bool $withCharts = false): Generator
+	public function setGenerateMode(
+		string $generateMode, bool $withCharts = false, string $averageType = Consts::DAYS_AVG_TYPE_WEEK
+	): Generator
 	{
 		$this->generateMode = $generateMode;
 
@@ -100,5 +108,13 @@ abstract class Generator
 	public function getOutputPath(): string
 	{
 		return $this->outputPath;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getAverageType(): string
+	{
+		return $this->averageType;
 	}
 }

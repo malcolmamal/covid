@@ -35,6 +35,7 @@ class Service
 		$this->generator = $generator;
 		$this->data = new Data();
 		$this->data->setExcelFriendly();
+		$this->data->setAverageType($this->generator->getAverageType());
 
 		$this->inputHandler = new InputHandler();
 

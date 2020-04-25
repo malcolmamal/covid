@@ -16,6 +16,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class ExcelGenerator extends Generator
 {
 	const COLUMN_DATE = 'Date';
+
 	const COLUMN_CONFIRMED_TOTAL = 'Total Confirmed';
 	const COLUMN_DEATHS_TOTAL = 'Total Deaths';
 	const COLUMN_RECOVERED_TOTAL = 'Total Recovered';
@@ -31,6 +32,10 @@ class ExcelGenerator extends Generator
 	const COLUMN_RATIO_DEATHS = 'Deaths %';
 	const COLUMN_RATIO_RECOVERED = 'Recovered %';
 	const COLUMN_RATIO_DEATHS_FROM_CLOSED = 'Deaths % From Closed Cases';
+
+	const COLUMN_CONFIRMED_AVG = 'Confirmed Average';
+	const COLUMN_DEATHS_AVG = 'Deaths Average';
+	const COLUMN_RECOVERED_AVG = 'Recovered Average';
 
 	const COLUMNS = [
 		self::COLUMN_DATE => 1,
@@ -50,6 +55,10 @@ class ExcelGenerator extends Generator
 		self::COLUMN_RATIO_DEATHS => 11,
 		self::COLUMN_RATIO_RECOVERED => 12,
 		self::COLUMN_RATIO_DEATHS_FROM_CLOSED => 13,
+
+		self::COLUMN_CONFIRMED_AVG => 14,
+		self::COLUMN_DEATHS_AVG => 15,
+		self::COLUMN_RECOVERED_AVG => 16,
 	];
 
 	const TREND_BACKGROUND_COLORS = [
@@ -112,10 +121,13 @@ class ExcelGenerator extends Generator
 	/**
 	 * @param string $generateMode
 	 * @param bool $withCharts
+	 * @param string $averageType
 	 *
 	 * @return Generator
 	 */
-	public function setGenerateMode(string $generateMode, bool $withCharts = false): Generator
+	public function setGenerateMode(
+		string $generateMode, bool $withCharts = false, string $averageType = Consts::DAYS_AVG_TYPE_WEEK
+	): Generator
 	{
 		parent::setGenerateMode($generateMode);
 
@@ -124,6 +136,8 @@ class ExcelGenerator extends Generator
 			$withCharts = false;
 		}
 		$this->setGenerateCharts($withCharts);
+
+		$this->setAverageType($averageType);
 
 		return $this;
 	}
@@ -262,6 +276,16 @@ class ExcelGenerator extends Generator
 			$this->writeCellNumberValue(self::COLUMN_RATIO_DEATHS_FROM_CLOSED, $row, $deathsPercentageFromClosed,
 				[], self::FORMATTING_TYPE_PERCENTAGE);
 
+			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_AVG, $row,
+				$this->data->getRollingAverageValue($country, Consts::TYPE_CONFIRMED, $dateKey, $this->averageType),
+				$trendParams + ['type' => Consts::TYPE_CONFIRMED_AVERAGE]);
+			$this->writeCellNumberValue(self::COLUMN_DEATHS_AVG, $row,
+				$this->data->getRollingAverageValue($country, Consts::TYPE_DEATHS, $dateKey, $this->averageType),
+				$trendParams + ['type' => Consts::TYPE_DEATHS_AVERAGE]);
+			$this->writeCellNumberValue(self::COLUMN_RECOVERED_AVG, $row,
+				$this->data->getRollingAverageValue($country, Consts::TYPE_RECOVERED, $dateKey, $this->averageType),
+				$trendParams + ['type' => Consts::TYPE_RECOVERED_AVERAGE]);
+
 			$row++;
 		}
 
@@ -279,6 +303,21 @@ class ExcelGenerator extends Generator
 	public function setGenerateCharts(bool $generateCharts): self
 	{
 		$this->generateCharts = $generateCharts;
+
+		return $this;
+	}
+
+	/**
+	 * @param string $averageType
+	 *
+	 * @return ExcelGenerator
+	 */
+	public function setAverageType(string $averageType): self
+	{
+		if (in_array($averageType, [Consts::DAYS_AVG_TYPE_WEEK, Consts::DAYS_AVG_TYPE_FORTNIGHT]))
+		{
+			$this->averageType = $averageType;
+		}
 
 		return $this;
 	}
