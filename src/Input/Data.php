@@ -1,8 +1,10 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\Input;
 
-class CovidData
+use Covid\Service\Service;
+
+class Data
 {
 	const COUNTRY_POLAND = 'Poland';
 	const COUNTRY_USA = 'US';
@@ -24,8 +26,8 @@ class CovidData
 	const TREND_NEGATIVE = 'negative';
 
 	const TREND = 'trend';
-	const TREND_TYPE_DAY = self::TREND . CovidService::DAY_SUFFIX;
-	const TREND_TYPE_INCREASE = self::TREND . CovidService::INCREASE_SUFFIX;
+	const TREND_TYPE_DAY = self::TREND . Service::DAY_SUFFIX;
+	const TREND_TYPE_INCREASE = self::TREND . Service::INCREASE_SUFFIX;
 
 	/**
 	 * @var array
@@ -392,19 +394,19 @@ class CovidData
 		foreach ($this->getCountryNames() as $country)
 		{
 			$this->perCountries[$country] = [
-				CovidService::TYPE_CONFIRMED => $this->confirmed[$country] ?? 0,
-				CovidService::TYPE_DEATHS => $this->deaths[$country] ?? 0,
-				CovidService::TYPE_RECOVERED => $this->recovered[$country] ?? 0,
+				Service::TYPE_CONFIRMED => $this->confirmed[$country] ?? 0,
+				Service::TYPE_DEATHS => $this->deaths[$country] ?? 0,
+				Service::TYPE_RECOVERED => $this->recovered[$country] ?? 0,
 
-				CovidService::TYPE_CONFIRMED_DAY => $this->confirmedDay[$country] ?? 0,
-				CovidService::TYPE_DEATHS_DAY => $this->deathsDay[$country] ?? 0,
-				CovidService::TYPE_RECOVERED_DAY => $this->recoveredDay[$country] ?? 0,
+				Service::TYPE_CONFIRMED_DAY => $this->confirmedDay[$country] ?? 0,
+				Service::TYPE_DEATHS_DAY => $this->deathsDay[$country] ?? 0,
+				Service::TYPE_RECOVERED_DAY => $this->recoveredDay[$country] ?? 0,
 
-				CovidService::TYPE_CONFIRMED_INCREASE => $this->confirmedIncrease[$country] ?? 0,
-				CovidService::TYPE_DEATHS_INCREASE => $this->deathsIncrease[$country] ?? 0,
-				CovidService::TYPE_RECOVERED_INCREASE => $this->recoveredIncrease[$country] ?? 0,
+				Service::TYPE_CONFIRMED_INCREASE => $this->confirmedIncrease[$country] ?? 0,
+				Service::TYPE_DEATHS_INCREASE => $this->deathsIncrease[$country] ?? 0,
+				Service::TYPE_RECOVERED_INCREASE => $this->recoveredIncrease[$country] ?? 0,
 
-				CovidService::TYPE_TRENDS => $this->trends[$country] ?? [],
+				Service::TYPE_TRENDS => $this->trends[$country] ?? [],
 			];
 		}
 	}
@@ -412,7 +414,7 @@ class CovidData
 	/**
 	 * @param bool $excelFriendly
 	 *
-	 * @return CovidData
+	 * @return Data
 	 */
 	public function setExcelFriendly(bool $excelFriendly = true): self
 	{
@@ -439,7 +441,7 @@ class CovidData
 		$positive = self::TREND_POSITIVE;
 		$negative = self::TREND_NEGATIVE;
 
-		if ($type === CovidService::TYPE_RECOVERED)
+		if ($type === Service::TYPE_RECOVERED)
 		{
 			// increase in recoveries is a positive trend so we reverse it
 			$positive = self::TREND_NEGATIVE;
@@ -448,12 +450,12 @@ class CovidData
 
 		if ($previousDay != 0 || $currentDay != 0)
 		{
-			$this->trends[$country][$day][$type . CovidService::DAY_SUFFIX] = ($currentDay > $previousDay) ? $positive : $negative;
+			$this->trends[$country][$day][$type . Service::DAY_SUFFIX] = ($currentDay > $previousDay) ? $positive : $negative;
 		}
 
 		if ($previousIncrease != 0 || $currentIncrease != 0)
 		{
-			$this->trends[$country][$day][$type . CovidService::INCREASE_SUFFIX] = ($currentIncrease > $previousIncrease) ? $positive : $negative;
+			$this->trends[$country][$day][$type . Service::INCREASE_SUFFIX] = ($currentIncrease > $previousIncrease) ? $positive : $negative;
 		}
 	}
 

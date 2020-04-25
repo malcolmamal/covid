@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\Input;
+use Covid\Service\Service;
+use Covid\Util\Util;
 
 /**
  * https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv
@@ -8,9 +10,9 @@ namespace Covid;
  * https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_recovered_global.csv
  */
 
-class CovidInputHandler
+class InputHandler
 {
-	const TMP_DIR = 'temp'; // should be set to a place where we download and generate files
+	const TMP_DIR = '../temp'; // should be set to a place where we download and generate files
 	const DATA_DIR = self::TMP_DIR . '/covid/';
 
 	/**
@@ -29,7 +31,7 @@ class CovidInputHandler
 	private $suffixPath = '_global.csv';
 
 	/**
-	 * @var CovidData
+	 * @var Data
 	 */
 	private $data;
 
@@ -38,7 +40,7 @@ class CovidInputHandler
 	 */
 	public function downloadCsvFiles(): void
 	{
-		CovidTool::mkdir(self::DATA_DIR);
+		Util::mkdir(self::DATA_DIR);
 
 		foreach ([$this->getConfirmedPath(), $this->getDeathsPath(), $this->getRecoveredPath()] as $path)
 		{
@@ -52,9 +54,9 @@ class CovidInputHandler
 	 */
 	public function readCsvFiles(): void
 	{
-		$this->readCsvFile(self::DATA_DIR . $this->getConfirmedPath(), CovidService::TYPE_CONFIRMED);
-		$this->readCsvFile(self::DATA_DIR . $this->getDeathsPath(), CovidService::TYPE_DEATHS);
-		$this->readCsvFile(self::DATA_DIR . $this->getRecoveredPath(), CovidService::TYPE_RECOVERED);
+		$this->readCsvFile(self::DATA_DIR . $this->getConfirmedPath(), Service::TYPE_CONFIRMED);
+		$this->readCsvFile(self::DATA_DIR . $this->getDeathsPath(), Service::TYPE_DEATHS);
+		$this->readCsvFile(self::DATA_DIR . $this->getRecoveredPath(), Service::TYPE_RECOVERED);
 	}
 
 	/**
@@ -88,7 +90,7 @@ class CovidInputHandler
 	 */
 	private function getConfirmedPath(): string
 	{
-		return $this->prefixPath . CovidService::TYPE_CONFIRMED . $this->suffixPath;
+		return $this->prefixPath . Service::TYPE_CONFIRMED . $this->suffixPath;
 	}
 
 	/**
@@ -96,7 +98,7 @@ class CovidInputHandler
 	 */
 	private function getDeathsPath(): string
 	{
-		return $this->prefixPath . CovidService::TYPE_DEATHS . $this->suffixPath;
+		return $this->prefixPath . Service::TYPE_DEATHS . $this->suffixPath;
 	}
 
 	/**
@@ -104,15 +106,15 @@ class CovidInputHandler
 	 */
 	private function getRecoveredPath(): string
 	{
-		return $this->prefixPath . CovidService::TYPE_RECOVERED . $this->suffixPath;
+		return $this->prefixPath . Service::TYPE_RECOVERED . $this->suffixPath;
 	}
 
 	/**
-	 * @param CovidData $data
+	 * @param Data $data
 	 *
-	 * @return CovidInputHandler
+	 * @return InputHandler
 	 */
-	public function setData(CovidData $data): self
+	public function setData(Data $data): self
 	{
 		$this->data = $data;
 

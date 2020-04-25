@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\MachineLearning;
 
 use Phpml\Regression\LeastSquares;
 use Phpml\Regression\SVR;
 use Phpml\SupportVectorMachine\Kernel;
 
-class CovidLearning
+class Learning
 {
 	public static function testTrain()
 	{

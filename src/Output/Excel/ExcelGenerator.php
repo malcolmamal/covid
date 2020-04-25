@@ -1,7 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\Output\Excel;
 
+use Covid\Input\Data;
+use Covid\Output\Generator;
+use Covid\Service\Service;
+use Covid\Util\Util;
 use PHPExcel;
 use PHPExcel_CachedObjectStorageFactory;
 use PHPExcel_Cell_DataType;
@@ -18,7 +22,7 @@ use PHPExcel_Style_NumberFormat;
 use PHPExcel_Worksheet;
 use PHPExcel_Writer_Abstract;
 
-class CovidExcelGenerator extends CovidGenerator
+class ExcelGenerator extends Generator
 {
 	const COLUMN_DATE = 'Date';
 	const COLUMN_CONFIRMED_TOTAL = 'Total Confirmed';
@@ -58,8 +62,8 @@ class CovidExcelGenerator extends CovidGenerator
 	];
 
 	const TREND_BACKGROUND_COLORS = [
-		CovidData::TREND_POSITIVE => 'ffb3b3', // red
-		CovidData::TREND_NEGATIVE => 'b3ff99', // green
+		Data::TREND_POSITIVE => 'ffb3b3', // red
+		Data::TREND_NEGATIVE => 'b3ff99', // green
 	];
 
 	const FORMATTING_TYPE_DEFAULT = 'default';
@@ -143,9 +147,28 @@ class CovidExcelGenerator extends CovidGenerator
 			$this->generateChartForAllCountries();
 		}
 
-		$this->document->setActiveSheetIndexByName(CovidData::COUNTRY_POLAND);
+		$this->document->setActiveSheetIndexByName(Data::COUNTRY_POLAND);
 
 		$this->saveData();
+	}
+
+	/**
+	 * @param string $generateMode
+	 *
+	 * @return Generator
+	 */
+	public function setGenerateMode(string $generateMode): Generator
+	{
+		parent::setGenerateMode($generateMode);
+
+		$generateCharts = true;
+		if ($generateMode === Generator::GENERATE_FOR_ALL)
+		{
+			$generateCharts = false;
+		}
+		$this->setGenerateCharts($generateCharts);
+
+		return $this;
 	}
 
 	/**
@@ -201,7 +224,7 @@ class CovidExcelGenerator extends CovidGenerator
 			return false;
 		}
 
-		if (empty($dataForCountry[CovidService::TYPE_CONFIRMED]))
+		if (empty($dataForCountry[Service::TYPE_CONFIRMED]))
 		{
 			return false;
 		}
@@ -227,33 +250,33 @@ class CovidExcelGenerator extends CovidGenerator
 			'country' => $country
 		];
 
-		foreach ($dataForCountry[CovidService::TYPE_CONFIRMED] as $dateKey => $confirmed)
+		foreach ($dataForCountry[Service::TYPE_CONFIRMED] as $dateKey => $confirmed)
 		{
 			$trendParams['date'] = $dateKey;
 
 			$this->writeCellValue(self::COLUMN_DATE, $row, $this->getProperlyFormattedDate($dateKey));
 
-			$confirmedTotal = $dataForCountry[CovidService::TYPE_CONFIRMED][$dateKey];
-			$deathsTotal = $dataForCountry[CovidService::TYPE_DEATHS][$dateKey];
-			$recoveredTotal = $dataForCountry[CovidService::TYPE_RECOVERED][$dateKey];
+			$confirmedTotal = $dataForCountry[Service::TYPE_CONFIRMED][$dateKey];
+			$deathsTotal = $dataForCountry[Service::TYPE_DEATHS][$dateKey];
+			$recoveredTotal = $dataForCountry[Service::TYPE_RECOVERED][$dateKey];
 
 			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_TOTAL, $row, $confirmedTotal);
 			$this->writeCellNumberValue(self::COLUMN_DEATHS_TOTAL, $row, $deathsTotal);
 			$this->writeCellNumberValue(self::COLUMN_RECOVERED_TOTAL, $row, $recoveredTotal);
 
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[CovidService::TYPE_CONFIRMED_DAY][$dateKey],
-				$trendParams + ['type' => CovidService::TYPE_CONFIRMED_DAY]);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[CovidService::TYPE_DEATHS_DAY][$dateKey],
-				$trendParams + ['type' => CovidService::TYPE_DEATHS_DAY]);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[CovidService::TYPE_RECOVERED_DAY][$dateKey],
-				$trendParams + ['type' => CovidService::TYPE_RECOVERED_DAY]);
+			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Service::TYPE_CONFIRMED_DAY][$dateKey],
+				$trendParams + ['type' => Service::TYPE_CONFIRMED_DAY]);
+			$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Service::TYPE_DEATHS_DAY][$dateKey],
+				$trendParams + ['type' => Service::TYPE_DEATHS_DAY]);
+			$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Service::TYPE_RECOVERED_DAY][$dateKey],
+				$trendParams + ['type' => Service::TYPE_RECOVERED_DAY]);
 
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[CovidService::TYPE_CONFIRMED_INCREASE][$dateKey],
-				$trendParams + ['type' => CovidService::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[CovidService::TYPE_DEATHS_INCREASE][$dateKey],
-				$trendParams + ['type' => CovidService::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[CovidService::TYPE_RECOVERED_INCREASE][$dateKey],
-				$trendParams + ['type' => CovidService::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Service::TYPE_CONFIRMED_INCREASE][$dateKey],
+				$trendParams + ['type' => Service::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Service::TYPE_DEATHS_INCREASE][$dateKey],
+				$trendParams + ['type' => Service::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Service::TYPE_RECOVERED_INCREASE][$dateKey],
+				$trendParams + ['type' => Service::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
 
 			$deathsPercentage = 0;
 			$recoveredPercentage = 0;
@@ -290,7 +313,7 @@ class CovidExcelGenerator extends CovidGenerator
 	/**
 	 * @param bool $generateCharts
 	 *
-	 * @return CovidExcelGenerator
+	 * @return ExcelGenerator
 	 */
 	public function setGenerateCharts(bool $generateCharts): self
 	{
@@ -524,7 +547,7 @@ class CovidExcelGenerator extends CovidGenerator
 	 */
 	public static function convertColumnNumberToExcelFormat(int $number): string
 	{
-		if (!isset($GLOBALS['column_number_to_excel_column_name_mapping']) || !CovidTool::validArray($GLOBALS['column_number_to_excel_column_name_mapping']))
+		if (!isset($GLOBALS['column_number_to_excel_column_name_mapping']) || !Util::validArray($GLOBALS['column_number_to_excel_column_name_mapping']))
 		{
 			$GLOBALS['column_number_to_excel_column_name_mapping'] = array(
 				'1'  => 'A', '2' => 'B', '3' => 'C', '4' => 'D',

@@ -1,10 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\Output;
 
+use Covid\Input\Data;
+use Covid\Input\InputHandler;
 use DateTimeImmutable;
 
-abstract class CovidGenerator
+abstract class Generator
 {
 	const GENERATE_FOR_ALL = 'all';
 	const GENERATE_FOR_MAIN = 'main';
@@ -16,7 +18,7 @@ abstract class CovidGenerator
 	protected $generateMode = self::GENERATE_FOR_MAIN;
 
 	/**
-	 * @var CovidData
+	 * @var Data
 	 */
 	protected $data;
 
@@ -27,9 +29,9 @@ abstract class CovidGenerator
 	/**
 	 * @param string $generateMode
 	 *
-	 * @return CovidGenerator
+	 * @return Generator
 	 */
-	public function setGenerateMode(string $generateMode): self
+	public function setGenerateMode(string $generateMode): Generator
 	{
 		$this->generateMode = $generateMode;
 
@@ -37,11 +39,11 @@ abstract class CovidGenerator
 	}
 
 	/**
-	 * @param CovidData $data
+	 * @param Data $data
 	 *
-	 * @return CovidGenerator
+	 * @return Generator
 	 */
-	public function setData(CovidData $data): self
+	public function setData(Data $data): self
 	{
 		$this->data = $data;
 
@@ -86,6 +88,6 @@ abstract class CovidGenerator
 	 */
 	protected function getBaseFileName(): string
 	{
-		return CovidInputHandler::DATA_DIR . 'covid_' . $this->generateMode . '_' . date('Y-m-d');
+		return InputHandler::DATA_DIR . 'covid_' . $this->generateMode . '_' . date('Y-m-d');
 	}
 }

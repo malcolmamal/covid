@@ -1,10 +1,11 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\Util;
 
 use Closure;
+use Covid\Exception\Exception;
 
-class CovidTool
+class Util
 {
 	/**
 	 * runs closure with notices, warnings and errors converted to exception
@@ -14,7 +15,7 @@ class CovidTool
 	 *
 	 * @return null|mixed
 	 */
-	public static function runClosureWithExceptions(Closure $closure, $exception = CovidException::class)
+	public static function runClosureWithExceptions(Closure $closure, $exception = Exception::class)
 	{
 		$return = null;
 		set_error_handler(
@@ -54,7 +55,7 @@ class CovidTool
 				function () use ($directoryName) {
 					mkdir($directoryName, 0777, true);
 				},
-				CovidException::class
+				Exception::class
 			);
 		}
 
@@ -64,7 +65,7 @@ class CovidTool
 				function () use ($directoryName) {
 					chmod($directoryName, TEMP_DIRECTORY_PERMISSIONS);
 				},
-				CovidException::class
+				Exception::class
 			);
 		}
 	}

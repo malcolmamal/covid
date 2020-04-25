@@ -1,8 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Covid;
+namespace Covid\Service;
 
-class CovidService
+use Covid\Input\Data;
+use Covid\Input\InputHandler;
+use Covid\Output\Generator;
+
+class Service
 {
 	const TYPE_CONFIRMED = 'confirmed';
 	const TYPE_DEATHS = 'deaths';
@@ -22,29 +26,32 @@ class CovidService
 	const TYPE_TRENDS = 'trends';
 
 	/**
-	 * @var CovidData
+	 * @var Data
 	 */
 	private $data;
 
 	/**
-	 * @var CovidGenerator
+	 * @var Generator
 	 */
 	private $generator;
 
 	/**
-	 * @var CovidInputHandler
+	 * @var InputHandler
 	 */
 	private $inputHandler;
 
-	public function __construct()
+	/**
+	 * Service constructor.
+	 *
+	 * @param Generator $generator
+	 */
+	public function __construct(Generator $generator)
 	{
-		set_time_limit(0);
-
-		$this->generator = new CovidExcelGenerator();
-		$this->data = new CovidData();
+		$this->generator = $generator;
+		$this->data = new Data();
 		$this->data->setExcelFriendly();
 
-		$this->inputHandler = new CovidInputHandler();
+		$this->inputHandler = new InputHandler();
 
 		$this->inputHandler->downloadCsvFiles();
 	}
@@ -52,7 +59,7 @@ class CovidService
 	/**
 	 * reading, processing, generating and saving
 	 */
-	public function createExcel(): void
+	public function generateOutput(): void
 	{
 		//CovidLearning::testTrain();
 
@@ -71,8 +78,7 @@ class CovidService
 	 */
 	private function setAll(): void
 	{
-		$this->generator->setGenerateMode(CovidGenerator::GENERATE_FOR_ALL);
-		$this->generator->setGenerateCharts(false);
+		$this->generator->setGenerateMode(Generator::GENERATE_FOR_ALL);
 	}
 
 	/**
@@ -80,8 +86,7 @@ class CovidService
 	 */
 	private function setMain(): void
 	{
-		$this->generator->setGenerateMode(CovidGenerator::GENERATE_FOR_MAIN);
-		$this->generator->setGenerateCharts(true);
+		$this->generator->setGenerateMode(Generator::GENERATE_FOR_MAIN);
 	}
 
 	/**
@@ -89,7 +94,6 @@ class CovidService
 	 */
 	private function setTest(): void
 	{
-		$this->generator->setGenerateMode(CovidGenerator::GENERATE_FOR_TEST);
-		$this->generator->setGenerateCharts(true);
+		$this->generator->setGenerateMode(Generator::GENERATE_FOR_TEST);
 	}
 }
