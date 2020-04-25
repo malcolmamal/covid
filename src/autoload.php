@@ -16,7 +16,6 @@ function covidAutoload(string $className)
 		return;
 	}
 
-
 	if (strpos($className, 'Covid\\') != 0)
 	{
 		return;
@@ -35,7 +34,6 @@ function covidAutoload(string $className)
 		require_once $filePath;
 	}
 }
-
 
 class Autoloader
 {
@@ -56,12 +54,8 @@ class Autoloader
 		}
 
 		array_shift($parts);
-		var_dump($parts);
 
 		$filePath = __DIR__ . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts) . '.php';
-
-		var_dump($filePath);
-
 		if (is_file($filePath))
 		{
 			require_once $filePath;
@@ -70,28 +64,5 @@ class Autoloader
 		}
 
 		return false;
-	}
-
-	/**
-	 * @param array $parts
-	 *
-	 * @return string
-	 */
-	protected static function getLowercasePath(array $parts)
-	{
-		end($parts);
-
-		// get class name without namespace, and it's position on the list
-		$lastKey               = key($parts);
-		$classWithoutNamespace = $parts[$lastKey];
-
-		// make path lowercase
-		$path           = array_map(function ($value)
-		{
-			return strtolower($value);
-		}, $parts);
-		$path[$lastKey] = $classWithoutNamespace;
-
-		return '/' . implode('/', $path) . '.php';
 	}
 }

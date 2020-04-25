@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
 
 namespace Covid\Input;
-use Covid\Service\Service;
+use Covid\Consts;
 use Covid\Util\Util;
 
 /**
@@ -54,9 +54,9 @@ class InputHandler
 	 */
 	public function readCsvFiles(): void
 	{
-		$this->readCsvFile(self::DATA_DIR . $this->getConfirmedPath(), Service::TYPE_CONFIRMED);
-		$this->readCsvFile(self::DATA_DIR . $this->getDeathsPath(), Service::TYPE_DEATHS);
-		$this->readCsvFile(self::DATA_DIR . $this->getRecoveredPath(), Service::TYPE_RECOVERED);
+		$this->readCsvFile(self::DATA_DIR . $this->getConfirmedPath(), Consts::TYPE_CONFIRMED);
+		$this->readCsvFile(self::DATA_DIR . $this->getDeathsPath(), Consts::TYPE_DEATHS);
+		$this->readCsvFile(self::DATA_DIR . $this->getRecoveredPath(), Consts::TYPE_RECOVERED);
 	}
 
 	/**
@@ -90,7 +90,7 @@ class InputHandler
 	 */
 	private function getConfirmedPath(): string
 	{
-		return $this->prefixPath . Service::TYPE_CONFIRMED . $this->suffixPath;
+		return $this->prefixPath . Consts::TYPE_CONFIRMED . $this->suffixPath;
 	}
 
 	/**
@@ -98,7 +98,7 @@ class InputHandler
 	 */
 	private function getDeathsPath(): string
 	{
-		return $this->prefixPath . Service::TYPE_DEATHS . $this->suffixPath;
+		return $this->prefixPath . Consts::TYPE_DEATHS . $this->suffixPath;
 	}
 
 	/**
@@ -106,7 +106,7 @@ class InputHandler
 	 */
 	private function getRecoveredPath(): string
 	{
-		return $this->prefixPath . Service::TYPE_RECOVERED . $this->suffixPath;
+		return $this->prefixPath . Consts::TYPE_RECOVERED . $this->suffixPath;
 	}
 
 	/**

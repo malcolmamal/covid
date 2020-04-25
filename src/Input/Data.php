@@ -2,7 +2,7 @@
 
 namespace Covid\Input;
 
-use Covid\Service\Service;
+use Covid\Consts;
 
 class Data
 {
@@ -26,8 +26,8 @@ class Data
 	const TREND_NEGATIVE = 'negative';
 
 	const TREND = 'trend';
-	const TREND_TYPE_DAY = self::TREND . Service::DAY_SUFFIX;
-	const TREND_TYPE_INCREASE = self::TREND . Service::INCREASE_SUFFIX;
+	const TREND_TYPE_DAY = self::TREND . Consts::DAY_SUFFIX;
+	const TREND_TYPE_INCREASE = self::TREND . Consts::INCREASE_SUFFIX;
 
 	/**
 	 * @var array
@@ -394,19 +394,19 @@ class Data
 		foreach ($this->getCountryNames() as $country)
 		{
 			$this->perCountries[$country] = [
-				Service::TYPE_CONFIRMED => $this->confirmed[$country] ?? 0,
-				Service::TYPE_DEATHS => $this->deaths[$country] ?? 0,
-				Service::TYPE_RECOVERED => $this->recovered[$country] ?? 0,
+				Consts::TYPE_CONFIRMED => $this->confirmed[$country] ?? 0,
+				Consts::TYPE_DEATHS => $this->deaths[$country] ?? 0,
+				Consts::TYPE_RECOVERED => $this->recovered[$country] ?? 0,
 
-				Service::TYPE_CONFIRMED_DAY => $this->confirmedDay[$country] ?? 0,
-				Service::TYPE_DEATHS_DAY => $this->deathsDay[$country] ?? 0,
-				Service::TYPE_RECOVERED_DAY => $this->recoveredDay[$country] ?? 0,
+				Consts::TYPE_CONFIRMED_DAY => $this->confirmedDay[$country] ?? 0,
+				Consts::TYPE_DEATHS_DAY => $this->deathsDay[$country] ?? 0,
+				Consts::TYPE_RECOVERED_DAY => $this->recoveredDay[$country] ?? 0,
 
-				Service::TYPE_CONFIRMED_INCREASE => $this->confirmedIncrease[$country] ?? 0,
-				Service::TYPE_DEATHS_INCREASE => $this->deathsIncrease[$country] ?? 0,
-				Service::TYPE_RECOVERED_INCREASE => $this->recoveredIncrease[$country] ?? 0,
+				Consts::TYPE_CONFIRMED_INCREASE => $this->confirmedIncrease[$country] ?? 0,
+				Consts::TYPE_DEATHS_INCREASE => $this->deathsIncrease[$country] ?? 0,
+				Consts::TYPE_RECOVERED_INCREASE => $this->recoveredIncrease[$country] ?? 0,
 
-				Service::TYPE_TRENDS => $this->trends[$country] ?? [],
+				Consts::TYPE_TRENDS => $this->trends[$country] ?? [],
 			];
 		}
 	}
@@ -441,7 +441,7 @@ class Data
 		$positive = self::TREND_POSITIVE;
 		$negative = self::TREND_NEGATIVE;
 
-		if ($type === Service::TYPE_RECOVERED)
+		if ($type === Consts::TYPE_RECOVERED)
 		{
 			// increase in recoveries is a positive trend so we reverse it
 			$positive = self::TREND_NEGATIVE;
@@ -450,12 +450,12 @@ class Data
 
 		if ($previousDay != 0 || $currentDay != 0)
 		{
-			$this->trends[$country][$day][$type . Service::DAY_SUFFIX] = ($currentDay > $previousDay) ? $positive : $negative;
+			$this->trends[$country][$day][$type . Consts::DAY_SUFFIX] = ($currentDay > $previousDay) ? $positive : $negative;
 		}
 
 		if ($previousIncrease != 0 || $currentIncrease != 0)
 		{
-			$this->trends[$country][$day][$type . Service::INCREASE_SUFFIX] = ($currentIncrease > $previousIncrease) ? $positive : $negative;
+			$this->trends[$country][$day][$type . Consts::INCREASE_SUFFIX] = ($currentIncrease > $previousIncrease) ? $positive : $negative;
 		}
 	}
 

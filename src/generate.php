@@ -14,7 +14,7 @@ include_once('autoload.php');
 
 try
 {
-	(new Service(new ExcelGenerator()))->generateOutput();
+	(new Service(new ExcelGenerator()))->setTest()->generateOutput();
 }
 catch (Exception $e)
 {

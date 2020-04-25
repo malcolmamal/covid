@@ -4,7 +4,7 @@ namespace Covid\Output\Excel;
 
 use Covid\Input\Data;
 use Covid\Output\Generator;
-use Covid\Service\Service;
+use Covid\Consts;
 use Covid\Util\Util;
 use PHPExcel;
 use PHPExcel_CachedObjectStorageFactory;
@@ -224,7 +224,7 @@ class ExcelGenerator extends Generator
 			return false;
 		}
 
-		if (empty($dataForCountry[Service::TYPE_CONFIRMED]))
+		if (empty($dataForCountry[Consts::TYPE_CONFIRMED]))
 		{
 			return false;
 		}
@@ -250,33 +250,33 @@ class ExcelGenerator extends Generator
 			'country' => $country
 		];
 
-		foreach ($dataForCountry[Service::TYPE_CONFIRMED] as $dateKey => $confirmed)
+		foreach ($dataForCountry[Consts::TYPE_CONFIRMED] as $dateKey => $confirmed)
 		{
 			$trendParams['date'] = $dateKey;
 
 			$this->writeCellValue(self::COLUMN_DATE, $row, $this->getProperlyFormattedDate($dateKey));
 
-			$confirmedTotal = $dataForCountry[Service::TYPE_CONFIRMED][$dateKey];
-			$deathsTotal = $dataForCountry[Service::TYPE_DEATHS][$dateKey];
-			$recoveredTotal = $dataForCountry[Service::TYPE_RECOVERED][$dateKey];
+			$confirmedTotal = $dataForCountry[Consts::TYPE_CONFIRMED][$dateKey];
+			$deathsTotal = $dataForCountry[Consts::TYPE_DEATHS][$dateKey];
+			$recoveredTotal = $dataForCountry[Consts::TYPE_RECOVERED][$dateKey];
 
 			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_TOTAL, $row, $confirmedTotal);
 			$this->writeCellNumberValue(self::COLUMN_DEATHS_TOTAL, $row, $deathsTotal);
 			$this->writeCellNumberValue(self::COLUMN_RECOVERED_TOTAL, $row, $recoveredTotal);
 
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Service::TYPE_CONFIRMED_DAY][$dateKey],
-				$trendParams + ['type' => Service::TYPE_CONFIRMED_DAY]);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Service::TYPE_DEATHS_DAY][$dateKey],
-				$trendParams + ['type' => Service::TYPE_DEATHS_DAY]);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Service::TYPE_RECOVERED_DAY][$dateKey],
-				$trendParams + ['type' => Service::TYPE_RECOVERED_DAY]);
+			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Consts::TYPE_CONFIRMED_DAY][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY]);
+			$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Consts::TYPE_DEATHS_DAY][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_DEATHS_DAY]);
+			$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Consts::TYPE_RECOVERED_DAY][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_RECOVERED_DAY]);
 
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Service::TYPE_CONFIRMED_INCREASE][$dateKey],
-				$trendParams + ['type' => Service::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Service::TYPE_DEATHS_INCREASE][$dateKey],
-				$trendParams + ['type' => Service::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Service::TYPE_RECOVERED_INCREASE][$dateKey],
-				$trendParams + ['type' => Service::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
 
 			$deathsPercentage = 0;
 			$recoveredPercentage = 0;
