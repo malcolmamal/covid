@@ -3,6 +3,8 @@
 namespace Covid\Util\Command;
 
 use Covid\Consts;
+use Covid\Exception\CommandException;
+use Covid\Input\Data;
 use Covid\Output\Excel\ExcelGenerator;
 use Covid\Service\Service;
 use Symfony\Component\Console\Command\Command;
@@ -24,7 +26,7 @@ class GenerateCommand extends Command
 	/**
 	 * Configuration
 	 */
-	protected function configure()
+	protected function configure(): void
 	{
 		$this
 			->setDescription('Generate data')
@@ -48,24 +50,42 @@ class GenerateCommand extends Command
 	 * @param OutputInterface $output
 	 *
 	 * @return int
+	 *
+	 * @throws CommandException
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		if ($input->getOption('download'))
 		{
-			$downloadCommand = $this->getApplication()->find(Consts::COMMAND_DOWNLOAD);
+			$application = $this->getApplication();
+
+			if (!$application)
+			{
+				throw new CommandException('Application not found');
+			}
+
+			$downloadCommand = $application->find(Consts::COMMAND_DOWNLOAD);
 			$downloadCommand->run(
 				new ArrayInput(['command' => Consts::COMMAND_DOWNLOAD,]),
 				new NullOutput()
 			);
 		}
 
+		$mode = $input->getOption('mode');
+		$country = $input->getOption('country');
+		$avg = $input->getOption('avg');
+
+		if (!is_string($mode) || !is_string($avg) || !is_array($country))
+		{
+			throw new CommandException('Invalid options');
+		}
+
 		$service = (new Service((
-			new ExcelGenerator())->setGenerateMode(
-				$input->getOption('mode'),
-				$input->getOption('country'),
-				$input->getOption('avg'),
-				$input->getOption('with-charts')
+			new ExcelGenerator(new Data()))->setGenerateMode(
+				$mode,
+				$country,
+				$avg,
+				(bool)$input->getOption('with-charts')
 			))
 		);
 		$service->generateOutput();

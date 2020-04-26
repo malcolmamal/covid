@@ -5,6 +5,7 @@ namespace Covid\Service;
 use Covid\Consts;
 use Covid\Input\Data;
 use Covid\Input\InputHandler;
+use Covid\Output\Excel\ExcelGenerator;
 use Covid\Output\Generator;
 
 class Service
@@ -30,18 +31,15 @@ class Service
 	 * @param Generator $generator
 	 * @param bool $downloadFiles
 	 */
-	public function __construct(Generator $generator = null, bool $downloadFiles = false)
+	public function __construct(Generator $generator, bool $downloadFiles = false)
 	{
-		$this->data = new Data();
+		$this->generator = $generator;
+
+		$this->data = $generator->getData();
 		$this->data->setExcelFriendly();
+		$this->data->setAverageType($this->generator->getAverageType());
 
-		if (!empty($generator))
-		{
-			$this->generator = $generator;
-			$this->data->setAverageType($this->generator->getAverageType());
-		}
-
-		$this->inputHandler = new InputHandler();
+		$this->inputHandler = new InputHandler($this->data);
 
 		if ($downloadFiles)
 		{
@@ -56,7 +54,6 @@ class Service
 	 */
 	public function listCountries(bool $withProvinces = false): array
 	{
-		$this->inputHandler->setData($this->data);
 		$this->inputHandler->readCsvFiles();
 
 		$countryNames = $this->data->getCountryNames();
@@ -81,9 +78,7 @@ class Service
 	 */
 	public function generateOutput(): void
 	{
-		$this->inputHandler->setData($this->data);
 		$this->inputHandler->readCsvFiles();
-		$this->data->arrangeData();
 
 		$this->generator->setData($this->data);
 		$this->generator->generate();

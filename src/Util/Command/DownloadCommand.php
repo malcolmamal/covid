@@ -3,6 +3,7 @@
 namespace Covid\Util\Command;
 
 use Covid\Consts;
+use Covid\Input\Data;
 use Covid\Input\InputHandler;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -20,7 +21,7 @@ class DownloadCommand extends Command
 	/**
 	 * Configuration
 	 */
-	protected function configure()
+	protected function configure(): void
 	{
 		$this
 			->setDescription('Download data')
@@ -36,7 +37,7 @@ class DownloadCommand extends Command
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		(new InputHandler())->downloadCsvFiles();
+		(new InputHandler(new Data()))->downloadCsvFiles();
 
 		return 0;
 	}

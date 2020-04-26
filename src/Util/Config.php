@@ -7,12 +7,12 @@ use Covid\Exception\ConfigException;
 class Config
 {
 	/**
-	 * @var Config
+	 * @var Config|null
 	 */
-	private static $instance = null;
+	private static $instance;
 
 	/**
-	 * @var array
+	 * @var string[]
 	 */
 	private $configArray = [];
 
@@ -26,7 +26,7 @@ class Config
 	 */
 	public static function getInstance(): Config
 	{
-		if (self::$instance == null)
+		if (self::$instance === null)
 		{
 			self::$instance = new Config();
 		}
@@ -37,7 +37,7 @@ class Config
 	/**
 	 * @param string $key
 	 * @param bool $cryOnFailure
-	 * @param string|null $default
+	 * @param string $default
 	 *
 	 * @return string
 	 *

@@ -2,10 +2,10 @@
 
 namespace Covid\Output\Excel;
 
+use Covid\Exception\ExcelException;
 use Covid\Input\Data;
 use Covid\Output\Generator;
 use Covid\Consts;
-use Covid\Util\Util;
 use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
@@ -117,17 +117,25 @@ class ExcelGenerator extends Generator
 	private $currentTotals = [];
 
 	/**
+	 * ExcelGenerator constructor.
+	 *
+	 * @param Data $data
+	 */
+	public function __construct(Data $data)
+	{
+		$this->outputResultLocation = '';
+
+		$this->data = $data;
+		$this->document = new Spreadsheet();
+		$this->chartGenerator = new ChartGenerator($this->document);
+	}
+
+	/**
 	 * Generate the Excel file
 	 */
 	public function generate(): void
 	{
-		$this->document = new Spreadsheet();
 		$this->document->getActiveSheet()->setTitle(self::MAIN_SHEET_NAME);
-
-		if ($this->generateCharts)
-		{
-			$this->chartGenerator = new ChartGenerator($this->document);
-		}
 
 		$iterator = 0;
 		$countries = array_merge($this->getCountriesForGeneration(), [self::MAIN_SHEET_NAME]);
@@ -241,12 +249,19 @@ class ExcelGenerator extends Generator
 	 * @param string $country
 	 *
 	 * @return Worksheet
+	 *
+	 * @throws ExcelException
 	 */
 	private function createSheet(string $country): Worksheet
 	{
 		if ($this->document->sheetNameExists($country))
 		{
 			$sheet = $this->document->getSheetByName($country);
+
+			if (!$sheet)
+			{
+				throw new ExcelException('Sheet not found for country: ' . $country);
+			}
 		}
 		else
 		{
@@ -263,7 +278,7 @@ class ExcelGenerator extends Generator
 	}
 
 	/**
-	 * @param array|null $dataForCountry
+	 * @param array $dataForCountry
 	 *
 	 * @return bool
 	 */
@@ -452,7 +467,7 @@ class ExcelGenerator extends Generator
 	/**
 	 * @param string $columnKey
 	 * @param int $row
-	 * @param $value
+	 * @param string|float|int $value
 	 * @param string $dataType
 	 */
 	private function writeCellValue(string $columnKey, int $row, $value, $dataType = DataType::TYPE_STRING): void
@@ -465,14 +480,14 @@ class ExcelGenerator extends Generator
 	/**
 	 * @param string $columnKey
 	 * @param int $row
-	 * @param $value
+	 * @param float $value
 	 * @param array $trends
 	 * @param string $formatting
 	 */
 	private function writeCellNumberValue(
 		string $columnKey,
 		int $row,
-		$value,
+		float $value,
 		array $trends = [],
 		string $formatting = self::FORMATTING_TYPE_NUMERIC
 	): void

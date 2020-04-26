@@ -8,7 +8,7 @@ use Phpml\SupportVectorMachine\Kernel;
 
 class Learning
 {
-	public static function testTrain()
+	public static function testTrain(): void
 	{
 		$regression = new SVR(Kernel::LINEAR, $degree = 3, $epsilon = 10.0);
 
@@ -40,15 +40,16 @@ class Learning
 
 		$regression->train($samples, $targets);
 
-		var_dump($regression->predict([66]));
+		print_r($regression->predict([66]));
 
 
-		var_dump("next will be: " . ($beforePrevious + $previous));
+		print_r("next will be: " . ($beforePrevious + $previous));
 
-		var_dump($setX, $setY);
+		print_r($setX);
+		print_r($setY);
 
-		$x = [[1], [2], [3], [4], [5], [6], [7], [8], [9]];
-		$y = [1, 1, 2, 3, 5, 8, 13, 21, 34];
+		$setX = [[1], [2], [3], [4], [5], [6], [7], [8], [9]];
+		$setY = [1, 1, 2, 3, 5, 8, 13, 21, 34];
 
 		$regression = new LeastSquares();
 		$regression->train($setX, $setY);

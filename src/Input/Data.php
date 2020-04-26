@@ -93,7 +93,7 @@ class Data
 	private $provinces = [];
 
 	/**
-	 * @var array
+	 * @var string[]
 	 */
 	private $dates = [];
 
@@ -128,7 +128,7 @@ class Data
 	private $trends = [];
 
 	/**
-	 * @var RollingAverageData[]
+	 * @var array
 	 */
 	private $rollingAverages = [];
 
@@ -361,7 +361,7 @@ class Data
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	public function getCountryNames(): array
 	{
@@ -377,7 +377,7 @@ class Data
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	public function getTestCountryNames(): array
 	{
@@ -390,7 +390,7 @@ class Data
 	}
 
 	/**
-	 * @return array
+	 * @return string[]
 	 */
 	public function getMainCountryNames(): array
 	{
@@ -517,7 +517,7 @@ class Data
 	 * @param string $day
 	 * @param string $type
 	 *
-	 * @return null|string
+	 * @return string
 	 */
 	public function getSpecificTrend(string $country, string $day, string $type): string
 	{

@@ -3,7 +3,7 @@
 namespace Covid\Util;
 
 use Closure;
-use Covid\Exception\Exception;
+use Covid\Exception\FileException;
 
 class Util
 {
@@ -11,17 +11,15 @@ class Util
 	 * runs closure with notices, warnings and errors converted to exception
 	 *
 	 * @param Closure $closure
-	 * @param string $exception
 	 *
-	 * @return null|mixed
+	 * @return mixed
 	 */
-	public static function runClosureWithExceptions(Closure $closure, $exception = Exception::class)
+	public static function runClosureWithExceptions(Closure $closure)
 	{
-		$return = null;
 		set_error_handler(
-			function ($errNo, $errStr, $errFile, $errLine) use ($exception)
+			function (int $errNo, string $errStr, string $errFile, int $errLine)
 			{
-				throw new $exception($errStr);
+				throw new FileException($errStr);
 			}
 		);
 
@@ -58,19 +56,7 @@ class Util
 				function () use ($directoryName)
 				{
 					mkdir($directoryName, 0777, true);
-				},
-				Exception::class
-			);
-		}
-
-		if (defined('TEMP_DIRECTORY_PERMISSIONS'))
-		{
-			self::runClosureWithExceptions(
-				function () use ($directoryName)
-				{
-					chmod($directoryName, TEMP_DIRECTORY_PERMISSIONS);
-				},
-				Exception::class
+				}
 			);
 		}
 	}

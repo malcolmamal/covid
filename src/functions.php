@@ -5,7 +5,7 @@
  *
  * @param string $className
  */
-function covidAutoload(string $className)
+function covidAutoload(string $className): void
 {
 	if (autoloadNamespace($className))
 	{
@@ -42,7 +42,7 @@ function autoloadNamespace($className): bool
 {
 	$parts = explode('\\', $className);
 
-	if (empty($parts) || $parts[0] !== 'Covid')
+	if (count($parts) === 0 || $parts[0] !== 'Covid')
 	{
 		return false;
 	}
@@ -52,6 +52,9 @@ function autoloadNamespace($className): bool
 	$filePath = __DIR__ . DIRECTORY_SEPARATOR . implode(DIRECTORY_SEPARATOR, $parts) . '.php';
 	if (is_file($filePath))
 	{
+		/**
+		 * @psalm-suppress UnresolvableInclude
+		 */
 		require_once $filePath;
 
 		return true;

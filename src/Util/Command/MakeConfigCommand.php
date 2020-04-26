@@ -21,7 +21,7 @@ class MakeConfigCommand extends Command
 	/**
 	 * Configuration
 	 */
-	protected function configure()
+	protected function configure(): void
 	{
 		$this
 			->setDescription('Makes a local config')

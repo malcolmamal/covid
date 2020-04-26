@@ -19,7 +19,7 @@ class TestCommand extends Command
 	/**
 	 * Configuration
 	 */
-	protected function configure()
+	protected function configure(): void
 	{
 		$this
 			->setDescription('Test data')
@@ -40,7 +40,7 @@ class TestCommand extends Command
 		return 0;
 	}
 
-	public function doTest()
+	public function doTest(): void
 	{
 		// duh
 	}

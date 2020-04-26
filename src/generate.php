@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use Covid\Input\Data;
 use Covid\Output\Excel\ExcelGenerator;
 use Covid\Service\Service;
 use Covid\Exception\Exception;
@@ -14,9 +15,9 @@ include_once('autoload.php');
 
 try
 {
-	(new Service(new ExcelGenerator(), true))->setTest()->generateOutput();
+	(new Service(new ExcelGenerator(new Data()), true))->setTest()->generateOutput();
 }
 catch (Exception $e)
 {
-	var_dump($e->getMessage());
+	print_r($e->getMessage());
 }

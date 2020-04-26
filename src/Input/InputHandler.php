@@ -40,8 +40,14 @@ class InputHandler
 	 */
 	private $data;
 
-	public function __construct()
+	/**
+	 * InputHandler constructor.
+	 *
+	 * @param Data $data
+	 */
+	public function __construct(Data $data)
 	{
+		$this->data = $data;
 		$this->dataPath = Config::getDataPath();
 
 		$this->baseDataPath = Config::getValue('covid_repository_path');
@@ -71,6 +77,8 @@ class InputHandler
 		$this->readCsvFile($this->dataPath . $this->getConfirmedPath(), Consts::TYPE_CONFIRMED);
 		$this->readCsvFile($this->dataPath . $this->getDeathsPath(), Consts::TYPE_DEATHS);
 		$this->readCsvFile($this->dataPath . $this->getRecoveredPath(), Consts::TYPE_RECOVERED);
+
+		$this->data->arrangeData();
 	}
 
 	/**
@@ -92,6 +100,11 @@ class InputHandler
 		{
 			while (($csvData = fgetcsv($handle, 1000, ",")) !== false)
 			{
+				if (empty($csvData))
+				{
+					break;
+				}
+
 				if ($row === 1)
 				{
 					$this->data->addHeadline($csvData);
@@ -129,17 +142,5 @@ class InputHandler
 	private function getRecoveredPath(): string
 	{
 		return $this->prefixPath . Consts::TYPE_RECOVERED . $this->suffixPath;
-	}
-
-	/**
-	 * @param Data $data
-	 *
-	 * @return InputHandler
-	 */
-	public function setData(Data $data): self
-	{
-		$this->data = $data;
-
-		return $this;
 	}
 }

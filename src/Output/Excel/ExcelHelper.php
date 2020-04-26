@@ -17,11 +17,11 @@ class ExcelHelper
 	/**
 	 * @param int $number
 	 *
-	 * @return null|string
+	 * @return string
 	 */
 	public static function convertColumnNumberToExcelFormat(int $number): string
 	{
-		if (!is_int($number) || $number <= 0)
+		if ($number <= 0)
 		{
 			return '';
 		}

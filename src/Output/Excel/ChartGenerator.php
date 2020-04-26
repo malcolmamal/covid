@@ -17,12 +17,12 @@ class ChartGenerator
 	const CHART_TITLE_FOR_COUNTRY = 'Cases for ';
 
 	/**
-	 * @var array
+	 * @var DataSeriesValues[]
 	 */
 	private $mainDataSeriesLabels = [];
 
 	/**
-	 * @var array
+	 * @var DataSeriesValues[]
 	 */
 	private $mainDataSeriesValues = [];
 
@@ -42,9 +42,9 @@ class ChartGenerator
 	}
 
 	/**
-	 * @param array $dataSeriesLabels
-	 * @param array $xAxisTickValues
-	 * @param array $dataSeriesValues
+	 * @param DataSeriesValues[] $dataSeriesLabels
+	 * @param DataSeriesValues[] $xAxisTickValues
+	 * @param DataSeriesValues[] $dataSeriesValues
 	 * @param string $title
 	 *
 	 * @return Chart
@@ -64,7 +64,7 @@ class ChartGenerator
 			$xAxisTickValues,
 			$dataSeriesValues,
 			null,
-			null,
+			false,
 			DataSeries::STYLE_MARKER
 		);
 

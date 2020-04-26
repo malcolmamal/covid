@@ -3,6 +3,7 @@
 namespace Covid\Output;
 
 use Covid\Consts;
+use Covid\Exception\Exception;
 use Covid\Input\Data;
 use Covid\Util\Config;
 use Covid\Util\Util;
@@ -16,7 +17,7 @@ abstract class Generator
 	protected $generateMode = Consts::GENERATE_FOR_MAIN;
 
 	/**
-	 * @var array
+	 * @var string[]
 	 */
 	protected $countriesToGenerate = [];
 
@@ -35,9 +36,9 @@ abstract class Generator
 	 */
 	protected $outputResultLocation;
 
-	abstract public function generate();
+	abstract public function generate(): void;
 
-	abstract protected function saveData();
+	abstract protected function saveData(): void;
 
 	/**
 	 * @param string $generateMode
@@ -73,13 +74,30 @@ abstract class Generator
 	}
 
 	/**
+	 * @return Data
+	 */
+	public function getData(): Data
+	{
+		return $this->data;
+	}
+
+	/**
 	 * @param string $americanDate
 	 *
 	 * @return string
+	 *
+	 * @throws Exception
 	 */
 	protected function getProperlyFormattedDate(string $americanDate): string
 	{
-		return DateTimeImmutable::createFromFormat('m/d/y', $americanDate)->format('Y-m-d');
+		$date = DateTimeImmutable::createFromFormat('m/d/y', $americanDate);
+
+		if (!$date)
+		{
+			throw new Exception('Failed creating date for: ' . $americanDate);
+		}
+
+		return $date->format('Y-m-d');
 	}
 
 	/**

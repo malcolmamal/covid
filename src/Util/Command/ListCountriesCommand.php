@@ -3,6 +3,8 @@
 namespace Covid\Util\Command;
 
 use Covid\Consts;
+use Covid\Input\Data;
+use Covid\Output\Excel\ExcelGenerator;
 use Covid\Service\Service;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -21,7 +23,7 @@ class ListCountriesCommand extends Command
 	/**
 	 * Configuration
 	 */
-	protected function configure()
+	protected function configure(): void
 	{
 		$this
 			->setDescription('List countries')
@@ -39,8 +41,8 @@ class ListCountriesCommand extends Command
 	 */
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
-		$service = new Service();
-		$countries = $service->listCountries($input->getOption('with-provinces'));
+		$service = new Service(new ExcelGenerator(new Data()));
+		$countries = $service->listCountries((bool)$input->getOption('with-provinces'));
 
 		$output->writeln('Available countries: ' . implode(', ', $countries));
 
