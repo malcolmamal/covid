@@ -37,7 +37,13 @@ class ExcelGenerator extends Generator
 	const COLUMN_DEATHS_AVG = 'Deaths Average';
 	const COLUMN_RECOVERED_AVG = 'Recovered Average';
 
-	const COLUMN_COUNTRY_NAMES = 'Countries';
+	const COLUMN_MAIN_COUNTRY_NAMES = 'Countries';
+
+	const PREFIX_MAIN_GLOBAL = 'Global ';
+
+	const COLUMN_MAIN_CONFIRMED_TOTAL = self::PREFIX_MAIN_GLOBAL . self::COLUMN_CONFIRMED_TOTAL;
+	const COLUMN_MAIN_DEATHS_TOTAL = self::PREFIX_MAIN_GLOBAL . self::COLUMN_DEATHS_TOTAL;
+	const COLUMN_MAIN_RECOVERED_TOTAL = self::PREFIX_MAIN_GLOBAL . self::COLUMN_RECOVERED_TOTAL;
 
 	const COLUMNS = [
 		self::COLUMN_DATE => 1,
@@ -62,7 +68,14 @@ class ExcelGenerator extends Generator
 		self::COLUMN_DEATHS_AVG => 15,
 		self::COLUMN_RECOVERED_AVG => 16,
 
-		self::COLUMN_COUNTRY_NAMES => 18,
+		/**
+		 * gap
+		 */
+
+		self::COLUMN_MAIN_COUNTRY_NAMES => 18,
+		self::COLUMN_MAIN_CONFIRMED_TOTAL => 19,
+		self::COLUMN_MAIN_DEATHS_TOTAL => 20,
+		self::COLUMN_MAIN_RECOVERED_TOTAL => 21,
 	];
 
 	const TREND_BACKGROUND_COLORS = [
@@ -99,6 +112,11 @@ class ExcelGenerator extends Generator
 	private $maxRow = 2;
 
 	/**
+	 * @var array
+	 */
+	private $currentTotals = [];
+
+	/**
 	 * Generate the Excel file
 	 */
 	public function generate(): void
@@ -117,7 +135,7 @@ class ExcelGenerator extends Generator
 		{
 			$this->createSheet($country);
 			$this->generateDataForCountry($country);
-			$this->addCountryNameToMainSheet($country, $i);
+			$this->addCountryDataToMainSheet($country, $i);
 
 			$i++;
 		}
@@ -136,7 +154,7 @@ class ExcelGenerator extends Generator
 	 * @param string $country
 	 * @param int $row
 	 */
-	private function addCountryNameToMainSheet(string $country, int $row): void
+	private function addCountryDataToMainSheet(string $country, int $row): void
 	{
 		if ($country === self::MAIN_SHEET_NAME)
 		{
@@ -144,7 +162,11 @@ class ExcelGenerator extends Generator
 		}
 
 		$this->document->setActiveSheetIndexByName(self::MAIN_SHEET_NAME);
-		$this->writeCellValue(self::COLUMN_COUNTRY_NAMES, ($row + 2), $country);
+		$this->writeCellValue(self::COLUMN_MAIN_COUNTRY_NAMES, ($row + 2), $country);
+
+		$this->writeCellNumberValue(self::COLUMN_MAIN_CONFIRMED_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_CONFIRMED]);
+		$this->writeCellNumberValue(self::COLUMN_MAIN_DEATHS_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_DEATHS]);
+		$this->writeCellNumberValue(self::COLUMN_MAIN_RECOVERED_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_RECOVERED]);
 	}
 
 	/**
@@ -248,7 +270,14 @@ class ExcelGenerator extends Generator
 	 */
 	private function generateDataForCountry(string $country): void
 	{
-		$row = 2; // because of header
+		$row = 2; // because of the header
+
+		$this->maxRow = $row;
+		$this->currentTotals = [
+			Consts::TYPE_CONFIRMED => 0,
+			Consts::TYPE_DEATHS => 0,
+			Consts::TYPE_RECOVERED => 0,
+		];
 
 		$dataForCountry = $this->data->getDataForCountry($country);
 
@@ -260,6 +289,10 @@ class ExcelGenerator extends Generator
 		$trendParams = [
 			'country' => $country
 		];
+
+		$confirmedTotal = 0;
+		$deathsTotal = 0;
+		$recoveredTotal = 0;
 
 		foreach ($dataForCountry[Consts::TYPE_CONFIRMED] as $dateKey => $confirmed)
 		{
@@ -342,6 +375,12 @@ class ExcelGenerator extends Generator
 		{
 			$this->chartGenerator->generateChartForCountry($country, $row);
 		}
+
+		$this->currentTotals = [
+			Consts::TYPE_CONFIRMED => $confirmedTotal,
+			Consts::TYPE_DEATHS => $deathsTotal,
+			Consts::TYPE_RECOVERED => $recoveredTotal,
+		];
 
 		$this->maxRow = $row;
 	}
@@ -462,12 +501,21 @@ class ExcelGenerator extends Generator
 	private function generateHeader(string $country): void
 	{
 		$row = 1;
+
 		/**
 		 * @var int $column
 		 */
 		foreach (self::COLUMNS as $columnName => $column)
 		{
-			if ($column === self::COLUMNS[self::COLUMN_COUNTRY_NAMES] && $country != self::MAIN_SHEET_NAME)
+			if (in_array(
+					$column, [
+						self::COLUMNS[self::COLUMN_MAIN_COUNTRY_NAMES],
+						self::COLUMNS[self::COLUMN_MAIN_CONFIRMED_TOTAL],
+						self::COLUMNS[self::COLUMN_MAIN_DEATHS_TOTAL],
+						self::COLUMNS[self::COLUMN_MAIN_RECOVERED_TOTAL],
+					]
+				)
+				&& $country != self::MAIN_SHEET_NAME)
 			{
 				continue;
 			}

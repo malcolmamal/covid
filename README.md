@@ -23,7 +23,7 @@ php index.php generate
 or
 
 ```bash
-php index.php generate -d
+php index.php generate --download
 ```
 
 You can also provide options for generation:
@@ -31,3 +31,16 @@ You can also provide options for generation:
 ```bash
 php index.php generate --mode main|all|test
 ```
+
+To include charts in the generated output
+
+```bash
+php index.php generate --with-charts
+```
+
+To change the rolling average
+
+```bash
+php index.php generate --avg week|fortnight
+```
+

@@ -29,10 +29,14 @@ class GenerateCommand extends Command
 		$this
 			->setDescription('Generate data')
 			->setHelp('Generates covid data')
-			->addOption('mode', 'm', InputOption::VALUE_OPTIONAL, '', Consts::GENERATE_FOR_MAIN)
-			->addOption('download', 'd', InputOption::VALUE_NONE)
-			->addOption('with-charts', 'c', InputOption::VALUE_NONE)
-			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL, '', Consts::DAYS_AVG_TYPE_WEEK)
+			->addOption('mode', 'm', InputOption::VALUE_OPTIONAL,
+				'picks for which group of countries the data will be processed for: all|main|test', Consts::GENERATE_FOR_MAIN)
+			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL,
+				'picks between the periods of rolling averages: week|fortnight', Consts::DAYS_AVG_TYPE_WEEK)
+			->addOption('download', 'd', InputOption::VALUE_NONE,
+				'decides whether the statistics data sources should be also downloaded')
+			->addOption('with-charts', 'c', InputOption::VALUE_NONE,
+				'decides whether the charts should be also generated')
 		;
 	}
 
