@@ -4,6 +4,7 @@ namespace Covid\Input;
 
 use Covid\Consts;
 use Covid\Exception\FileException;
+use Covid\Util\Config;
 use Covid\Util\Util;
 
 /**
@@ -14,8 +15,10 @@ use Covid\Util\Util;
 
 class InputHandler
 {
-	const TMP_DIR = '../temp'; // should be set to a place where we download and generate files
-	const DATA_DIR = self::TMP_DIR . '/covid/';
+	/**
+	 * @var string
+	 */
+	private $dataPath;
 
 	/**
 	 * @var string
@@ -37,16 +40,21 @@ class InputHandler
 	 */
 	private $data;
 
+	public function __construct()
+	{
+		$this->dataPath = Config::getDataPath();
+	}
+
 	/**
 	 * Downloads files from repository
 	 */
 	public function downloadCsvFiles(): void
 	{
-		Util::mkdir(self::DATA_DIR);
+		Util::mkdir($this->dataPath);
 
 		foreach ([$this->getConfirmedPath(), $this->getDeathsPath(), $this->getRecoveredPath()] as $path)
 		{
-			$command = 'wget -O ' . self::DATA_DIR . $path . ' '. $this->baseDataPath . $path;
+			$command = 'wget -O ' . $this->dataPath . $path . ' ' . $this->baseDataPath . $path;
 			exec($command);
 		}
 	}
@@ -56,9 +64,9 @@ class InputHandler
 	 */
 	public function readCsvFiles(): void
 	{
-		$this->readCsvFile(self::DATA_DIR . $this->getConfirmedPath(), Consts::TYPE_CONFIRMED);
-		$this->readCsvFile(self::DATA_DIR . $this->getDeathsPath(), Consts::TYPE_DEATHS);
-		$this->readCsvFile(self::DATA_DIR . $this->getRecoveredPath(), Consts::TYPE_RECOVERED);
+		$this->readCsvFile($this->dataPath . $this->getConfirmedPath(), Consts::TYPE_CONFIRMED);
+		$this->readCsvFile($this->dataPath . $this->getDeathsPath(), Consts::TYPE_DEATHS);
+		$this->readCsvFile($this->dataPath . $this->getRecoveredPath(), Consts::TYPE_RECOVERED);
 	}
 
 	/**

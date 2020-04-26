@@ -3,7 +3,6 @@
 namespace Covid\Util\Command;
 
 use Covid\Consts;
-use Covid\Input\InputHandler;
 use Covid\Service\Service;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

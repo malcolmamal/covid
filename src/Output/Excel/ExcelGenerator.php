@@ -220,7 +220,7 @@ class ExcelGenerator extends Generator
 
 		$excelWriter->save($fileName);
 
-		$this->outputPath = $fileName;
+		$this->outputResultLocation = $fileName;
 	}
 
 	/**

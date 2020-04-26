@@ -76,3 +76,13 @@ List available countries
 ```bash
  php index.php list:countries --with-provinces
 ```
+
+Creates local config if one needs to change some settings
+
+```bash
+ php index.php make:config
+```
+
+```bash
+ php index.php make:config --force
+```

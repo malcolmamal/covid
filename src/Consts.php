@@ -35,6 +35,7 @@ class Consts
 
 	const COMMAND_GENERATE = 'generate';
 	const COMMAND_DOWNLOAD = 'download';
+	const COMMAND_MAKE_CONFIG = 'make:config';
 	const COMMAND_LIST_COUNTRIES = 'list:countries';
 	const COMMAND_TEST = 'test';
 

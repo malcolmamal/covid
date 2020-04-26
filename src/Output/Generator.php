@@ -4,7 +4,7 @@ namespace Covid\Output;
 
 use Covid\Consts;
 use Covid\Input\Data;
-use Covid\Input\InputHandler;
+use Covid\Util\Config;
 use Covid\Util\Util;
 use DateTimeImmutable;
 
@@ -33,7 +33,7 @@ abstract class Generator
 	/**
 	 * @var string
 	 */
-	protected $outputPath;
+	protected $outputResultLocation;
 
 	abstract public function generate();
 
@@ -129,15 +129,15 @@ abstract class Generator
 	 */
 	protected function getBaseFileName(): string
 	{
-		return InputHandler::DATA_DIR . 'covid_' . $this->generateMode . '_' . date('Y-m-d');
+		return Config::getOutputPath() . 'covid_' . $this->generateMode . '_' . date('Y-m-d');
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getOutputPath(): string
+	public function getOutputResultLocation(): string
 	{
-		return $this->outputPath;
+		return $this->outputResultLocation;
 	}
 
 	/**

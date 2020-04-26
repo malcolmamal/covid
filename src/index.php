@@ -5,6 +5,7 @@ require 'autoload.php';
 use Covid\Util\Command\DownloadCommand;
 use Covid\Util\Command\GenerateCommand;
 use Covid\Util\Command\ListCountriesCommand;
+use Covid\Util\Command\MakeConfigCommand;
 use Covid\Util\Command\TestCommand;
 use Symfony\Component\Console\Application;
 
@@ -14,6 +15,7 @@ $application->addCommands([
 	new GenerateCommand(),
 	new DownloadCommand(),
 	new ListCountriesCommand(),
+	new MakeConfigCommand(),
 	new TestCommand(),
 ]);
 

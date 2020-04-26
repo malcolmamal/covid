@@ -94,9 +94,9 @@ class Service
 	/**
 	 * @return string
 	 */
-	public function getOutputPath(): string
+	public function getOutputResultLocation(): string
 	{
-		return $this->generator->getOutputPath();
+		return realpath($this->generator->getOutputResultLocation());
 	}
 
 	/**
