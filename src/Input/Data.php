@@ -6,6 +6,8 @@ use Covid\Consts;
 
 class Data
 {
+	const COUNTRIES_ALL = Consts::MAIN_SECTION;
+
 	const COUNTRY_POLAND = 'Poland';
 	const COUNTRY_USA = 'US';
 	const COUNTRY_GERMANY = 'Germany';
@@ -180,6 +182,9 @@ class Data
 			$this->$array[$country][$day] = $current;
 			$this->$arrayDay[$country][$day] = $currentDay;
 			$this->$arrayIncrease[$country][$day] = $currentIncrease;
+
+			@$this->$array[self::COUNTRIES_ALL][$day] += $current;
+			@$this->$arrayDay[self::COUNTRIES_ALL][$day] += $currentDay;
 
 			$rollingAverage->addValue($currentDay);
 			$currentAverage = $rollingAverage->getAverageForType($this->averageType);
@@ -441,7 +446,8 @@ class Data
 	 */
 	public function arrangeData(): void
 	{
-		foreach ($this->getCountryNames() as $country)
+		$countries = array_merge($this->getCountryNames(), [self::COUNTRIES_ALL]);
+		foreach ($countries as $country)
 		{
 			$this->perCountries[$country] = [
 				Consts::TYPE_CONFIRMED => $this->confirmed[$country] ?? 0,

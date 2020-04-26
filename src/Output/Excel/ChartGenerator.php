@@ -86,10 +86,6 @@ class ChartGenerator
 		$range = $lastRow - 1; // excel range
 		$entries = $lastRow - 2; // quantity
 
-		/**
-		 * @TODO: after migration to PhpSpreadsheet the labels stopped working, I think we will need to write the country names to the Main sheet and use them from there
-		 */
-		$this->mainDataSeriesLabels[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, null, null, 1, ['key' => $country]);
 		$this->mainDataSeriesValues[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'" . $country . "'" . '!$B$2:$B$' . $range, null, $entries);
 
 		$dataSeriesLabels = [
@@ -121,18 +117,30 @@ class ChartGenerator
 
 	/**
 	 * One big chart with all countries in it
+	 *
+	 * @param int $maxRow
 	 */
-	public function generateChartForAllCountries(): void
+	public function generateChartForAllCountries(int $maxRow): void
 	{
+		$mainSheetName = ExcelGenerator::MAIN_SHEET_NAME;
+		$entries = count($this->mainDataSeriesValues);
+
+		for ($i = 2; $i < ($entries + 2); $i++)
+		{
+			$this->mainDataSeriesLabels[] = new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_STRING, $mainSheetName . '!$R$' . $i, null, 1
+			);
+		}
+
 		$chart = $this->generateChart(
 			$this->mainDataSeriesLabels, [], $this->mainDataSeriesValues,
 			self::CHART_TITLE_ALL_COUNTRIES
 		);
 
-		$chart->setTopLeftPosition('B2');
-		$chart->setBottomRightPosition('AC58');
+		$chart->setTopLeftPosition('A' . ($maxRow + 2));
+		$chart->setBottomRightPosition('O' . ($maxRow + 60));
 
-		$this->document->setActiveSheetIndexByName(ExcelGenerator::MAIN_SHEET_NAME);
+		$this->document->setActiveSheetIndexByName($mainSheetName);
 
 		$this->document->getActiveSheet()->addChart($chart);
 	}

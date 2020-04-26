@@ -37,6 +37,8 @@ class ExcelGenerator extends Generator
 	const COLUMN_DEATHS_AVG = 'Deaths Average';
 	const COLUMN_RECOVERED_AVG = 'Recovered Average';
 
+	const COLUMN_COUNTRY_NAMES = 'Countries';
+
 	const COLUMNS = [
 		self::COLUMN_DATE => 1,
 
@@ -59,6 +61,8 @@ class ExcelGenerator extends Generator
 		self::COLUMN_CONFIRMED_AVG => 14,
 		self::COLUMN_DEATHS_AVG => 15,
 		self::COLUMN_RECOVERED_AVG => 16,
+
+		self::COLUMN_COUNTRY_NAMES => 18,
 	];
 
 	const TREND_BACKGROUND_COLORS = [
@@ -72,7 +76,7 @@ class ExcelGenerator extends Generator
 
 	const NUMBER_FORMAT = '###,###,###'; // alternatively: '#,##0'
 
-	const MAIN_SHEET_NAME = 'Main';
+	const MAIN_SHEET_NAME = Consts::MAIN_SECTION;
 
 	/**
 	 * @var Spreadsheet
@@ -90,6 +94,11 @@ class ExcelGenerator extends Generator
 	private $chartGenerator;
 
 	/**
+	 * @var int
+	 */
+	private $maxRow = 2;
+
+	/**
 	 * Generate the Excel file
 	 */
 	public function generate(): void
@@ -102,20 +111,40 @@ class ExcelGenerator extends Generator
 			$this->chartGenerator = new ChartGenerator($this->document);
 		}
 
-		foreach ($this->getCountriesForGeneration() as $country)
+		$i = 0;
+		$countries = array_merge($this->getCountriesForGeneration(), [self::MAIN_SHEET_NAME]);
+		foreach ($countries as $country)
 		{
 			$this->createSheet($country);
 			$this->generateDataForCountry($country);
+			$this->addCountryNameToMainSheet($country, $i);
+
+			$i++;
 		}
 
 		if ($this->generateCharts)
 		{
-			$this->chartGenerator->generateChartForAllCountries();
+			$this->chartGenerator->generateChartForAllCountries($this->maxRow);
 		}
 
 		$this->document->setActiveSheetIndexByName(Data::COUNTRY_POLAND);
 
 		$this->saveData();
+	}
+
+	/**
+	 * @param string $country
+	 * @param int $row
+	 */
+	private function addCountryNameToMainSheet(string $country, int $row): void
+	{
+		if ($country === self::MAIN_SHEET_NAME)
+		{
+			return;
+		}
+
+		$this->document->setActiveSheetIndexByName(self::MAIN_SHEET_NAME);
+		$this->writeCellValue(self::COLUMN_COUNTRY_NAMES, ($row + 2), $country);
 	}
 
 	/**
@@ -176,13 +205,20 @@ class ExcelGenerator extends Generator
 	 */
 	private function createSheet(string $country): Worksheet
 	{
-		$sheet = $this->document->createSheet();
-		$sheet->setTitle($country);
+		if ($this->document->sheetNameExists($country))
+		{
+			$sheet = $this->document->getSheetByName($country);
+		}
+		else
+		{
+			$sheet = $this->document->createSheet();
+			$sheet->setTitle($country);
+		}
 		$sheet->freezePane('A2');
 
 		$this->document->setActiveSheetIndexByName($country);
 
-		$this->generateHeader();
+		$this->generateHeader($country);
 
 		return $sheet;
 	}
@@ -246,12 +282,18 @@ class ExcelGenerator extends Generator
 			$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Consts::TYPE_RECOVERED_DAY][$dateKey],
 				$trendParams + ['type' => Consts::TYPE_RECOVERED_DAY]);
 
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			/**
+			 * @TODO: maybe apply formula instead? then we could also have data for COUNTRIES_ALL
+			 */
+			if ($country != Data::COUNTRIES_ALL)
+			{
+				$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
+					$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
+				$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
+					$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+				$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
+					$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			}
 
 			$deathsPercentage = 0;
 			$recoveredPercentage = 0;
@@ -276,6 +318,13 @@ class ExcelGenerator extends Generator
 			$this->writeCellNumberValue(self::COLUMN_RATIO_DEATHS_FROM_CLOSED, $row, $deathsPercentageFromClosed,
 				[], self::FORMATTING_TYPE_PERCENTAGE);
 
+			if ($country === Data::COUNTRIES_ALL)
+			{
+				$row++;
+
+				continue;
+			}
+
 			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_AVG, $row,
 				$this->data->getRollingAverageValue($country, Consts::TYPE_CONFIRMED, $dateKey, $this->averageType),
 				$trendParams + ['type' => Consts::TYPE_CONFIRMED_AVERAGE]);
@@ -289,10 +338,12 @@ class ExcelGenerator extends Generator
 			$row++;
 		}
 
-		if ($this->generateCharts)
+		if ($this->generateCharts && $country != Data::COUNTRIES_ALL)
 		{
 			$this->chartGenerator->generateChartForCountry($country, $row);
 		}
+
+		$this->maxRow = $row;
 	}
 
 	/**
@@ -405,12 +456,22 @@ class ExcelGenerator extends Generator
 
 	/**
 	 * Header and columns width
+	 *
+	 * @param string $country
 	 */
-	private function generateHeader(): void
+	private function generateHeader(string $country): void
 	{
 		$row = 1;
+		/**
+		 * @var int $column
+		 */
 		foreach (self::COLUMNS as $columnName => $column)
 		{
+			if ($column === self::COLUMNS[self::COLUMN_COUNTRY_NAMES] && $country != self::MAIN_SHEET_NAME)
+			{
+				continue;
+			}
+
 			$this->writeCellValue($columnName, $row, $columnName);
 			$this->document->getActiveSheet()->getColumnDimension(self::convertColumnNumberToExcelFormat($column))
 				->setAutoSize(true);

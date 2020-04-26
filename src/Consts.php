@@ -4,6 +4,8 @@ namespace Covid;
 
 class Consts
 {
+	const MAIN_SECTION = 'Main';
+
 	const TYPE_CONFIRMED = 'confirmed';
 	const TYPE_DEATHS = 'deaths';
 	const TYPE_RECOVERED = 'recovered';
