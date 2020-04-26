@@ -55,7 +55,7 @@ php index.php generate --avg week|fortnight
 To pick a specific country for generation
 
 ```bash
-php index.php generate --country Polad
+php index.php generate --country Poland
 ```
 
 or a list of countries
