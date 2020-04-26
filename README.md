@@ -13,6 +13,12 @@ Tool that fetches official covid data, parses them and generates a prepared outp
 
 Go to the [releases page](https://github.com/malcolmamal/covid/releases) and download the latest version.
 
+## Installation
+
+```bash
+composer install
+```
+
 ## Usage
 
 ```bash
@@ -26,7 +32,7 @@ or
 php index.php generate --download
 ```
 
-You can also provide options for generation:
+You can also provide options for generation
 
 ```bash
 php index.php generate --mode main|all|test
