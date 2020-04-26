@@ -89,6 +89,11 @@ class Service
 	 */
 	public function getOutputResultLocation(): string
 	{
+		if (realpath($this->generator->getOutputResultLocation()) === false)
+		{
+			return $this->generator->getOutputResultLocation();
+		}
+
 		return realpath($this->generator->getOutputResultLocation());
 	}
 

@@ -348,9 +348,9 @@ class ExcelGenerator extends Generator
 
 		$this->writeCellValue(self::COLUMN_DATE, $row, $this->getProperlyFormattedDate($dateKey));
 
-		$confirmedTotal = $dataForCountry[Consts::TYPE_CONFIRMED][$dateKey];
-		$deathsTotal = $dataForCountry[Consts::TYPE_DEATHS][$dateKey];
-		$recoveredTotal = $dataForCountry[Consts::TYPE_RECOVERED][$dateKey];
+		$confirmedTotal = (int)$dataForCountry[Consts::TYPE_CONFIRMED][$dateKey];
+		$deathsTotal = (int)$dataForCountry[Consts::TYPE_DEATHS][$dateKey];
+		$recoveredTotal = (int)$dataForCountry[Consts::TYPE_RECOVERED][$dateKey];
 
 		$this->writeCellNumberValue(self::COLUMN_CONFIRMED_TOTAL, $row, $confirmedTotal);
 		$this->writeCellNumberValue(self::COLUMN_DEATHS_TOTAL, $row, $deathsTotal);

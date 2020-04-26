@@ -58,14 +58,19 @@ class MakeConfigCommand extends Command
 		$result = copy($defaultConfig, $localConfig);
 		if (!$result)
 		{
-			throw new FileException('Failed creating local config. Might be permission issues?');
+			throw new FileException('Failed creating local config. Might be permission issues.');
 		}
 
 		$contents = file($localConfig, FILE_IGNORE_NEW_LINES);
+		if ($contents === false)
+		{
+			throw new FileException('Failed processing local config.');
+		}
+
 		$firstLine = array_shift($contents);
 		$secondLine = array_shift($contents);
 
-		if (!(strpos($firstLine, ';') === 0 && empty($secondLine)))
+		if (!($firstLine !== null && strpos($firstLine, ';') === 0 && empty($secondLine)))
 		{
 			throw new FileException('Original default config might be corrupted or was modified.');
 		}
