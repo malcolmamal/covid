@@ -262,22 +262,22 @@ class Data
 		}
 
 		$this->columns = count($dataRow);
-		for ($i = 4; $i < $this->columns; $i++)
+		for ($columnNumber = 4; $columnNumber < $this->columns; $columnNumber++)
 		{
-			$this->dates[$i] = $dataRow[$i];
+			$this->dates[$columnNumber] = $dataRow[$columnNumber];
 		}
 
 		$this->headlineInitialized = true;
 	}
 
 	/**
-	 * @param int $i
+	 * @param int $index
 	 *
 	 * @return string
 	 */
-	private function getDay(int $i): string
+	private function getDay(int $index): string
 	{
-		return $this->dates[$i];
+		return $this->dates[$index];
 	}
 
 	/**

@@ -14,10 +14,10 @@ class Learning
 
 		$beforePrevious = 1;
 		$previous = 1;
-		$x = [[1], [2]];
-		$y = [1, 1];
-		$i = 3;
-		foreach (range(3, 20) as $i)
+		$setX = [[1], [2]];
+		$setY = [1, 1];
+		$iterator = 3;
+		foreach (range(3, 20) as $iterator)
 		{
 			$current = $beforePrevious + $previous;
 			//var_dump($current);
@@ -25,8 +25,8 @@ class Learning
 			$beforePrevious = $previous;
 			$previous = $current;
 
-			$x[] = [$i];
-			$y[] = $current;
+			$setX[] = [$iterator];
+			$setY[] = $current;
 		}
 
 
@@ -42,19 +42,17 @@ class Learning
 		//$regression->train($samples, $targets);
 
 		var_dump($regression->predict([66]));
-		die();
-
 
 
 		var_dump("next will be: " . ($beforePrevious + $previous));
 
-		var_dump($x, $y);
+		var_dump($setX, $setY);
 
 		//$x = [[1], [2], [3], [4], [5], [6], [7], [8], [9]];
 		//$y = [1, 1, 2, 3, 5, 8, 13, 21, 34];
 
 		$regression = new LeastSquares();
-		$regression->train($x, $y);
-		echo $regression->predict([$i+2]);
+		$regression->train($setX, $setY);
+		echo $regression->predict([$iterator+2]);
 	}
 }

@@ -129,15 +129,15 @@ class ExcelGenerator extends Generator
 			$this->chartGenerator = new ChartGenerator($this->document);
 		}
 
-		$i = 0;
+		$iterator = 0;
 		$countries = array_merge($this->getCountriesForGeneration(), [self::MAIN_SHEET_NAME]);
 		foreach ($countries as $country)
 		{
 			$this->createSheet($country);
 			$this->generateDataForCountry($country);
-			$this->addCountryDataToMainSheet($country, $i);
+			$this->addCountryDataToMainSheet($country, $iterator);
 
-			$i++;
+			$iterator++;
 		}
 
 		if ($this->generateCharts)
@@ -282,8 +282,8 @@ class ExcelGenerator extends Generator
 	private function generateDataForCountry(string $country): void
 	{
 		$row = 2; // because of the header
-
 		$this->maxRow = $row;
+
 		$this->currentTotals = [
 			Consts::TYPE_CONFIRMED => 0,
 			Consts::TYPE_DEATHS => 0,
@@ -297,89 +297,9 @@ class ExcelGenerator extends Generator
 			return;
 		}
 
-		$trendParams = [
-			'country' => $country
-		];
-
-		$confirmedTotal = 0;
-		$deathsTotal = 0;
-		$recoveredTotal = 0;
-
 		foreach ($dataForCountry[Consts::TYPE_CONFIRMED] as $dateKey => $confirmed)
 		{
-			$trendParams['date'] = $dateKey;
-
-			$this->writeCellValue(self::COLUMN_DATE, $row, $this->getProperlyFormattedDate($dateKey));
-
-			$confirmedTotal = $dataForCountry[Consts::TYPE_CONFIRMED][$dateKey];
-			$deathsTotal = $dataForCountry[Consts::TYPE_DEATHS][$dateKey];
-			$recoveredTotal = $dataForCountry[Consts::TYPE_RECOVERED][$dateKey];
-
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_TOTAL, $row, $confirmedTotal);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_TOTAL, $row, $deathsTotal);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_TOTAL, $row, $recoveredTotal);
-
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Consts::TYPE_CONFIRMED_DAY][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY]);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Consts::TYPE_DEATHS_DAY][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_DEATHS_DAY]);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Consts::TYPE_RECOVERED_DAY][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_RECOVERED_DAY]);
-
-			/**
-			 * @TODO: maybe apply formula instead? then we could also have data for COUNTRIES_ALL
-			 */
-			if ($country != Data::COUNTRIES_ALL)
-			{
-				$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
-					$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
-				$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
-					$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
-				$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
-					$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
-			}
-
-			$deathsPercentage = 0;
-			$recoveredPercentage = 0;
-			if ($confirmedTotal != 0)
-			{
-				$deathsPercentage = $deathsTotal / $confirmedTotal;
-				$recoveredPercentage = $recoveredTotal / $confirmedTotal;
-			}
-
-			$deathsPercentageFromClosed = 0;
-			$finalizedTotal = $deathsTotal + $recoveredTotal;
-			if ($finalizedTotal != 0)
-			{
-				$deathsPercentageFromClosed = $deathsTotal / $finalizedTotal;
-			}
-
-			$this->writeCellNumberValue(self::COLUMN_RATIO_DEATHS, $row, $deathsPercentage,
-				[], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_RATIO_RECOVERED, $row, $recoveredPercentage,
-				[], self::FORMATTING_TYPE_PERCENTAGE);
-
-			$this->writeCellNumberValue(self::COLUMN_RATIO_DEATHS_FROM_CLOSED, $row, $deathsPercentageFromClosed,
-				[], self::FORMATTING_TYPE_PERCENTAGE);
-
-			if ($country === Data::COUNTRIES_ALL)
-			{
-				$row++;
-
-				continue;
-			}
-
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_AVG, $row,
-				$this->data->getRollingAverageValue($country, Consts::TYPE_CONFIRMED, $dateKey, $this->averageType),
-				$trendParams + ['type' => Consts::TYPE_CONFIRMED_AVERAGE]);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_AVG, $row,
-				$this->data->getRollingAverageValue($country, Consts::TYPE_DEATHS, $dateKey, $this->averageType),
-				$trendParams + ['type' => Consts::TYPE_DEATHS_AVERAGE]);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_AVG, $row,
-				$this->data->getRollingAverageValue($country, Consts::TYPE_RECOVERED, $dateKey, $this->averageType),
-				$trendParams + ['type' => Consts::TYPE_RECOVERED_AVERAGE]);
-
-			$row++;
+			$this->currentTotals = $this->addRowForCountry($country, $dataForCountry, $dateKey, $row);
 		}
 
 		if ($this->generateCharts && $country != Data::COUNTRIES_ALL)
@@ -387,13 +307,101 @@ class ExcelGenerator extends Generator
 			$this->chartGenerator->generateChartForCountry($country, $row);
 		}
 
-		$this->currentTotals = [
+		$this->maxRow = $row;
+	}
+
+	/**
+	 * @param string $country
+	 * @param array $dataForCountry
+	 * @param string $dateKey
+	 * @param int $row
+	 *
+	 * @return array
+	 */
+	private function addRowForCountry(string $country, array $dataForCountry, string $dateKey, int &$row): array
+	{
+		$trendParams = [
+			'country' => $country,
+			'date' => $dateKey
+		];
+
+		$this->writeCellValue(self::COLUMN_DATE, $row, $this->getProperlyFormattedDate($dateKey));
+
+		$confirmedTotal = $dataForCountry[Consts::TYPE_CONFIRMED][$dateKey];
+		$deathsTotal = $dataForCountry[Consts::TYPE_DEATHS][$dateKey];
+		$recoveredTotal = $dataForCountry[Consts::TYPE_RECOVERED][$dateKey];
+
+		$this->writeCellNumberValue(self::COLUMN_CONFIRMED_TOTAL, $row, $confirmedTotal);
+		$this->writeCellNumberValue(self::COLUMN_DEATHS_TOTAL, $row, $deathsTotal);
+		$this->writeCellNumberValue(self::COLUMN_RECOVERED_TOTAL, $row, $recoveredTotal);
+
+		$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Consts::TYPE_CONFIRMED_DAY][$dateKey],
+			$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY]);
+		$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Consts::TYPE_DEATHS_DAY][$dateKey],
+			$trendParams + ['type' => Consts::TYPE_DEATHS_DAY]);
+		$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Consts::TYPE_RECOVERED_DAY][$dateKey],
+			$trendParams + ['type' => Consts::TYPE_RECOVERED_DAY]);
+
+		/**
+		 * @TODO: maybe apply formula instead? then we could also have data for COUNTRIES_ALL
+		 */
+		if ($country != Data::COUNTRIES_ALL)
+		{
+			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+		}
+
+		$deathsPercentage = 0;
+		$recoveredPercentage = 0;
+		if ($confirmedTotal != 0)
+		{
+			$deathsPercentage = $deathsTotal / $confirmedTotal;
+			$recoveredPercentage = $recoveredTotal / $confirmedTotal;
+		}
+
+		$deathsPercentageFromClosed = 0;
+		$finalizedTotal = $deathsTotal + $recoveredTotal;
+		if ($finalizedTotal != 0)
+		{
+			$deathsPercentageFromClosed = $deathsTotal / $finalizedTotal;
+		}
+
+		$this->writeCellNumberValue(self::COLUMN_RATIO_DEATHS, $row, $deathsPercentage,
+			[], self::FORMATTING_TYPE_PERCENTAGE);
+		$this->writeCellNumberValue(self::COLUMN_RATIO_RECOVERED, $row, $recoveredPercentage,
+			[], self::FORMATTING_TYPE_PERCENTAGE);
+
+		$this->writeCellNumberValue(self::COLUMN_RATIO_DEATHS_FROM_CLOSED, $row, $deathsPercentageFromClosed,
+			[], self::FORMATTING_TYPE_PERCENTAGE);
+
+		if ($country === Data::COUNTRIES_ALL)
+		{
+			$row++;
+
+			return [];
+		}
+
+		$this->writeCellNumberValue(self::COLUMN_CONFIRMED_AVG, $row,
+			$this->data->getRollingAverageValue($country, Consts::TYPE_CONFIRMED, $dateKey, $this->averageType),
+			$trendParams + ['type' => Consts::TYPE_CONFIRMED_AVERAGE]);
+		$this->writeCellNumberValue(self::COLUMN_DEATHS_AVG, $row,
+			$this->data->getRollingAverageValue($country, Consts::TYPE_DEATHS, $dateKey, $this->averageType),
+			$trendParams + ['type' => Consts::TYPE_DEATHS_AVERAGE]);
+		$this->writeCellNumberValue(self::COLUMN_RECOVERED_AVG, $row,
+			$this->data->getRollingAverageValue($country, Consts::TYPE_RECOVERED, $dateKey, $this->averageType),
+			$trendParams + ['type' => Consts::TYPE_RECOVERED_AVERAGE]);
+
+		$row++;
+
+		return [
 			Consts::TYPE_CONFIRMED => $confirmedTotal,
 			Consts::TYPE_DEATHS => $deathsTotal,
 			Consts::TYPE_RECOVERED => $recoveredTotal,
 		];
-
-		$this->maxRow = $row;
 	}
 
 	/**
@@ -532,7 +540,7 @@ class ExcelGenerator extends Generator
 			}
 
 			$this->writeCellValue($columnName, $row, $columnName);
-			$this->document->getActiveSheet()->getColumnDimension(self::convertColumnNumberToExcelFormat($column))
+			$this->document->getActiveSheet()->getColumnDimension(ExcelHelper::convertColumnNumberToExcelFormat($column))
 				->setAutoSize(true);
 		}
 		$this->document->getActiveSheet()->calculateColumnWidths();
@@ -555,54 +563,6 @@ class ExcelGenerator extends Generator
 	 */
 	private function getColumnNumberInExcelFormat(string $column): string
 	{
-		return self::convertColumnNumberToExcelFormat($this->getColumnNumber($column));
-	}
-
-	/**
-	 * @param int $number
-	 *
-	 * @return null|string
-	 */
-	public static function convertColumnNumberToExcelFormat(int $number): string
-	{
-		if (!isset($GLOBALS['column_number_to_excel_column_name_mapping'])
-			|| !Util::validArray($GLOBALS['column_number_to_excel_column_name_mapping'])
-		)
-		{
-			$GLOBALS['column_number_to_excel_column_name_mapping'] = [
-				'1'  => 'A', '2' => 'B', '3' => 'C', '4' => 'D',
-				'5'  => 'E', '6' => 'F', '7' => 'G', '8' => 'H',
-				'9'  => 'I', '10' => 'J', '11' => 'K', '12' => 'L',
-				'13' => 'M', '14' => 'N', '15' => 'O', '16' => 'P',
-				'17' => 'Q', '18' => 'R', '19' => 'S', '20' => 'T',
-				'21' => 'U', '22' => 'V', '23' => 'W', '24' => 'X',
-				'25' => 'Y', '26' => 'Z'
-			];
-		}
-		$letters = $GLOBALS['column_number_to_excel_column_name_mapping'];
-
-		if (!is_int($number) || $number <= 0)
-		{
-			return '';
-		}
-		elseif ($number <= 26)
-		{
-			return $letters[$number];
-		}
-		else
-		{
-			$i = $number / 26;
-			$i = (int)floor($i);
-
-			$j = $number - ($i * 26);
-			$j = (int)$j;
-
-			if ($number % 26 == 0)
-			{
-				$i--;
-				$j = 26;
-			}
-			return $letters[$i] . $letters[$j];
-		}
+		return ExcelHelper::convertColumnNumberToExcelFormat($this->getColumnNumber($column));
 	}
 }
