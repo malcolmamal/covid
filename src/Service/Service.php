@@ -30,12 +30,16 @@ class Service
 	 * @param Generator $generator
 	 * @param bool $downloadFiles
 	 */
-	public function __construct(Generator $generator, bool $downloadFiles = false)
+	public function __construct(Generator $generator = null, bool $downloadFiles = false)
 	{
-		$this->generator = $generator;
 		$this->data = new Data();
 		$this->data->setExcelFriendly();
-		$this->data->setAverageType($this->generator->getAverageType());
+
+		if (!empty($generator))
+		{
+			$this->generator = $generator;
+			$this->data->setAverageType($this->generator->getAverageType());
+		}
 
 		$this->inputHandler = new InputHandler();
 
@@ -43,6 +47,33 @@ class Service
 		{
 			$this->inputHandler->downloadCsvFiles();
 		}
+	}
+
+	/**
+	 * @param bool $withProvinces
+	 *
+	 * @return array
+	 */
+	public function listCountries(bool $withProvinces = false): array
+	{
+		$this->inputHandler->setData($this->data);
+		$this->inputHandler->readCsvFiles();
+
+		$countryNames = $this->data->getCountryNames();
+
+		if (!$withProvinces)
+		{
+			$separationString = ' - ';
+			foreach ($countryNames as $key => $countryName)
+			{
+				if (strpos($countryName, $separationString) !== false)
+				{
+					unset($countryNames[$key]);
+				}
+			}
+		}
+
+		return $countryNames;
 	}
 
 	/**

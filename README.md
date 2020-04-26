@@ -52,3 +52,27 @@ To change the rolling average
 php index.php generate --avg week|fortnight
 ```
 
+To pick a specific country for generation
+
+```bash
+php index.php generate --country Polad
+```
+
+or a list of countries
+
+```bash
+php index.php generate --country Poland --country US --country Germany
+```
+
+
+## Additional commands
+
+List available countries
+
+```bash
+ php index.php list:countries
+```
+
+```bash
+ php index.php list:countries --with-provinces
+```

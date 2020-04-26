@@ -33,9 +33,11 @@ class GenerateCommand extends Command
 				'picks for which group of countries the data will be processed for: all|main|test', Consts::GENERATE_FOR_MAIN)
 			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL,
 				'picks between the periods of rolling averages: week|fortnight', Consts::DAYS_AVG_TYPE_WEEK)
+			->addOption('country', 'c', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
+				'picks for which countries the data should be generated')
 			->addOption('download', 'd', InputOption::VALUE_NONE,
-				'decides whether the statistics data sources should be also downloaded')
-			->addOption('with-charts', 'c', InputOption::VALUE_NONE,
+				'decides whether the statistics data sources should also be downloaded')
+			->addOption('with-charts', 'w', InputOption::VALUE_NONE,
 				'decides whether the charts should be also generated')
 		;
 	}
@@ -60,8 +62,9 @@ class GenerateCommand extends Command
 		$service = (new Service((
 			new ExcelGenerator())->setGenerateMode(
 				$input->getOption('mode'),
-				$input->getOption('with-charts'),
-				$input->getOption('avg')
+				$input->getOption('country'),
+				$input->getOption('avg'),
+				$input->getOption('with-charts')
 			))
 		);
 		$service->generateOutput();

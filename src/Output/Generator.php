@@ -5,6 +5,7 @@ namespace Covid\Output;
 use Covid\Consts;
 use Covid\Input\Data;
 use Covid\Input\InputHandler;
+use Covid\Util\Util;
 use DateTimeImmutable;
 
 abstract class Generator
@@ -13,6 +14,11 @@ abstract class Generator
 	 * @var string
 	 */
 	protected $generateMode = Consts::GENERATE_FOR_MAIN;
+
+	/**
+	 * @var array
+	 */
+	protected $countriesToGenerate = [];
 
 	/**
 	 * @var string
@@ -35,16 +41,21 @@ abstract class Generator
 
 	/**
 	 * @param string $generateMode
-	 * @param bool $withCharts
+	 * @param array $countries
 	 * @param string $averageType
+	 * @param bool $withCharts
 	 *
 	 * @return Generator
 	 */
 	public function setGenerateMode(
-		string $generateMode, bool $withCharts = false, string $averageType = Consts::DAYS_AVG_TYPE_WEEK
+		string $generateMode,
+		array $countries = [],
+		string $averageType = Consts::DAYS_AVG_TYPE_WEEK,
+		bool $withCharts = false
 	): Generator
 	{
 		$this->generateMode = $generateMode;
+		$this->countriesToGenerate = $countries;
 
 		return $this;
 	}
@@ -76,6 +87,16 @@ abstract class Generator
 	 */
 	protected function getCountriesForGeneration(): array
 	{
+		if (Util::validArray($this->countriesToGenerate))
+		{
+			$correctCountries = array_intersect($this->data->getCountryNames(), $this->countriesToGenerate);
+			if (Util::validArray($correctCountries))
+			{
+				$this->countriesToGenerate = $correctCountries;
+				$this->generateMode = Consts::GENERATE_FOR_MANUAL;
+			}
+		}
+
 		switch ($this->generateMode)
 		{
 			case Consts::GENERATE_FOR_ALL:
@@ -85,6 +106,15 @@ abstract class Generator
 			case Consts::GENERATE_FOR_TEST:
 			{
 				return $this->data->getTestCountryNames();
+			}
+			case Consts::GENERATE_FOR_MANUAL:
+			{
+				if (count($this->countriesToGenerate) === 1)
+				{
+					$this->generateMode = strtolower(reset($this->countriesToGenerate));
+				}
+
+				return $this->countriesToGenerate;
 			}
 			case Consts::GENERATE_FOR_MAIN:
 			default:

@@ -30,10 +30,12 @@ class Consts
 
 	const GENERATE_FOR_ALL = 'all';
 	const GENERATE_FOR_MAIN = 'main';
+	const GENERATE_FOR_MANUAL = 'manual';
 	const GENERATE_FOR_TEST = 'test';
 
 	const COMMAND_GENERATE = 'generate';
 	const COMMAND_DOWNLOAD = 'download';
+	const COMMAND_LIST_COUNTRIES = 'list:countries';
 	const COMMAND_TEST = 'test';
 
 	const DAYS_WEEK = 7;

@@ -145,7 +145,14 @@ class ExcelGenerator extends Generator
 			$this->chartGenerator->generateChartForAllCountries($this->maxRow);
 		}
 
-		$this->document->setActiveSheetIndexByName(Data::COUNTRY_POLAND);
+		$this->document->setActiveSheetIndexByName(Data::COUNTRIES_ALL);
+		if ($this->document->sheetNameExists(Data::COUNTRY_POLAND))
+		{
+			/**
+			 * I'm not sorry, if Poland is on the list, it comes first ;-)
+			 */
+			$this->document->setActiveSheetIndexByName(Data::COUNTRY_POLAND);
+		}
 
 		$this->saveData();
 	}
@@ -171,16 +178,20 @@ class ExcelGenerator extends Generator
 
 	/**
 	 * @param string $generateMode
-	 * @param bool $withCharts
+	 * @param array $countries
 	 * @param string $averageType
+	 * @param bool $withCharts
 	 *
 	 * @return Generator
 	 */
 	public function setGenerateMode(
-		string $generateMode, bool $withCharts = false, string $averageType = Consts::DAYS_AVG_TYPE_WEEK
+		string $generateMode,
+		array $countries = [],
+		string $averageType = Consts::DAYS_AVG_TYPE_WEEK,
+		bool $withCharts = false
 	): Generator
 	{
-		parent::setGenerateMode($generateMode);
+		parent::setGenerateMode($generateMode, $countries);
 
 		if ($generateMode === Consts::GENERATE_FOR_ALL)
 		{
