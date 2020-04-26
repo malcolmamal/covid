@@ -1,10 +1,18 @@
 {
     "name": "malcolmamal/covid",
-	"description": "parsing of official covid data and generating a processed spreadsheet",
+    "description": "parsing of official covid data and generating a processed spreadsheet",
     "license": "MIT",
     "require": {        
-	"php-ai/php-ml": "^0.8.0",
+        "php-ai/php-ml": "^0.8.0",
         "symfony/console": "^4.4",
         "phpoffice/phpspreadsheet": "^1.11"
+    },
+    "require-dev": {
+        "phpmd/phpmd" : "@stable"
+    },
+    "scripts": {
+        "phpmd": [
+            "vendor/bin/phpmd src text phpmd.xml"
+        ]
     }
 }
