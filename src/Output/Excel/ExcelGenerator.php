@@ -171,9 +171,15 @@ class ExcelGenerator extends Generator
 		$this->document->setActiveSheetIndexByName(self::MAIN_SHEET_NAME);
 		$this->writeCellValue(self::COLUMN_MAIN_COUNTRY_NAMES, ($row + 2), $country);
 
-		$this->writeCellNumberValue(self::COLUMN_MAIN_CONFIRMED_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_CONFIRMED]);
-		$this->writeCellNumberValue(self::COLUMN_MAIN_DEATHS_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_DEATHS]);
-		$this->writeCellNumberValue(self::COLUMN_MAIN_RECOVERED_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_RECOVERED]);
+		$this->writeCellNumberValue(
+			self::COLUMN_MAIN_CONFIRMED_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_CONFIRMED]
+		);
+		$this->writeCellNumberValue(
+			self::COLUMN_MAIN_DEATHS_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_DEATHS]
+		);
+		$this->writeCellNumberValue(
+			self::COLUMN_MAIN_RECOVERED_TOTAL, ($row + 2), $this->currentTotals[Consts::TYPE_RECOVERED]
+		);
 	}
 
 	/**
@@ -335,24 +341,36 @@ class ExcelGenerator extends Generator
 		$this->writeCellNumberValue(self::COLUMN_DEATHS_TOTAL, $row, $deathsTotal);
 		$this->writeCellNumberValue(self::COLUMN_RECOVERED_TOTAL, $row, $recoveredTotal);
 
-		$this->writeCellNumberValue(self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Consts::TYPE_CONFIRMED_DAY][$dateKey],
-			$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY]);
-		$this->writeCellNumberValue(self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Consts::TYPE_DEATHS_DAY][$dateKey],
-			$trendParams + ['type' => Consts::TYPE_DEATHS_DAY]);
-		$this->writeCellNumberValue(self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Consts::TYPE_RECOVERED_DAY][$dateKey],
-			$trendParams + ['type' => Consts::TYPE_RECOVERED_DAY]);
+		$this->writeCellNumberValue(
+			self::COLUMN_CONFIRMED_DAY, $row, $dataForCountry[Consts::TYPE_CONFIRMED_DAY][$dateKey],
+			$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY]
+		);
+		$this->writeCellNumberValue(
+			self::COLUMN_DEATHS_DAY, $row, $dataForCountry[Consts::TYPE_DEATHS_DAY][$dateKey],
+			$trendParams + ['type' => Consts::TYPE_DEATHS_DAY]
+		);
+		$this->writeCellNumberValue(
+			self::COLUMN_RECOVERED_DAY, $row, $dataForCountry[Consts::TYPE_RECOVERED_DAY][$dateKey],
+			$trendParams + ['type' => Consts::TYPE_RECOVERED_DAY]
+		);
 
 		/**
 		 * @TODO: maybe apply formula instead? then we could also have data for COUNTRIES_ALL
 		 */
 		if ($country != Data::COUNTRIES_ALL)
 		{
-			$this->writeCellNumberValue(self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
-			$this->writeCellNumberValue(self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
-				$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE);
+			$this->writeCellNumberValue(
+				self::COLUMN_CONFIRMED_INCREASE, $row, $dataForCountry[Consts::TYPE_CONFIRMED_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_CONFIRMED_DAY], self::FORMATTING_TYPE_PERCENTAGE
+			);
+			$this->writeCellNumberValue(
+				self::COLUMN_DEATHS_INCREASE, $row, $dataForCountry[Consts::TYPE_DEATHS_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_DEATHS_INCREASE], self::FORMATTING_TYPE_PERCENTAGE
+			);
+			$this->writeCellNumberValue(
+				self::COLUMN_RECOVERED_INCREASE, $row, $dataForCountry[Consts::TYPE_RECOVERED_INCREASE][$dateKey],
+				$trendParams + ['type' => Consts::TYPE_RECOVERED_INCREASE], self::FORMATTING_TYPE_PERCENTAGE
+			);
 		}
 
 		$deathsPercentage = 0;
@@ -439,7 +457,9 @@ class ExcelGenerator extends Generator
 	 */
 	private function writeCellValue(string $columnKey, int $row, $value, $dataType = DataType::TYPE_STRING): void
 	{
-		$this->document->getActiveSheet()->setCellValueExplicitByColumnAndRow($this->getColumnNumber($columnKey), $row, $value, $dataType);
+		$this->document->getActiveSheet()->setCellValueExplicitByColumnAndRow(
+			$this->getColumnNumber($columnKey), $row, $value, $dataType
+		);
 	}
 
 	/**
@@ -449,7 +469,13 @@ class ExcelGenerator extends Generator
 	 * @param array $trends
 	 * @param string $formatting
 	 */
-	private function writeCellNumberValue(string $columnKey, int $row, $value, array $trends = [], string $formatting = self::FORMATTING_TYPE_NUMERIC): void
+	private function writeCellNumberValue(
+		string $columnKey,
+		int $row,
+		$value,
+		array $trends = [],
+		string $formatting = self::FORMATTING_TYPE_NUMERIC
+	): void
 	{
 		$this->writeCellValue($columnKey, $row, $value, DataType::TYPE_NUMERIC);
 
@@ -540,7 +566,8 @@ class ExcelGenerator extends Generator
 			}
 
 			$this->writeCellValue($columnName, $row, $columnName);
-			$this->document->getActiveSheet()->getColumnDimension(ExcelHelper::convertColumnNumberToExcelFormat($column))
+			$this->document->getActiveSheet()
+				->getColumnDimension(ExcelHelper::convertColumnNumberToExcelFormat($column))
 				->setAutoSize(true);
 		}
 		$this->document->getActiveSheet()->calculateColumnWidths();

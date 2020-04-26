@@ -47,12 +47,16 @@ class Util
 	{
 		if ($suppressWarningForAlreadyExists && file_exists($directoryName))
 		{
-			// maybe log that we already have this directory, since we should be sure not to make a dir if it's already there
+			/**
+			 *  maybe log that we already have this directory,
+			 *  since we should be sure not to make a dir if it's already there
+			 */
 		}
 		else
 		{
 			self::runClosureWithExceptions(
-				function () use ($directoryName) {
+				function () use ($directoryName)
+				{
 					mkdir($directoryName, 0777, true);
 				},
 				Exception::class
@@ -62,7 +66,8 @@ class Util
 		if (defined('TEMP_DIRECTORY_PERMISSIONS'))
 		{
 			self::runClosureWithExceptions(
-				function () use ($directoryName) {
+				function () use ($directoryName)
+				{
 					chmod($directoryName, TEMP_DIRECTORY_PERMISSIONS);
 				},
 				Exception::class

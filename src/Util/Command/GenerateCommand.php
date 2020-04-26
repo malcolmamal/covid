@@ -30,7 +30,8 @@ class GenerateCommand extends Command
 			->setDescription('Generate data')
 			->setHelp('Generates covid data')
 			->addOption('mode', 'm', InputOption::VALUE_OPTIONAL,
-				'picks for which group of countries the data will be processed for: all|main|test', Consts::GENERATE_FOR_MAIN)
+				'picks for which group of countries the data will be processed for: all|main|test',
+				Consts::GENERATE_FOR_MAIN)
 			->addOption('avg', 'a', InputOption::VALUE_OPTIONAL,
 				'picks between the periods of rolling averages: week|fortnight', Consts::DAYS_AVG_TYPE_WEEK)
 			->addOption('country', 'c', InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,

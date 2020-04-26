@@ -81,8 +81,6 @@ class Service
 	 */
 	public function generateOutput(): void
 	{
-		//Learning::testTrain();
-
 		$this->inputHandler->setData($this->data);
 		$this->inputHandler->readCsvFiles();
 		$this->data->arrangeData();

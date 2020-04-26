@@ -57,6 +57,10 @@ class Config
 			throw new ConfigException('Config key not found: ' . $key);
 		}
 
+		/**
+		 * TODO: check also in default file
+		 */
+
 		return $default;
 	}
 

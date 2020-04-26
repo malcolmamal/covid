@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+require_once 'version.php';
+
 require 'autoload.php';
 
 use Covid\Util\Command\DownloadCommand;

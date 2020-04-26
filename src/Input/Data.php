@@ -488,8 +488,12 @@ class Data
 	 * @param int|float $previous
 	 */
 	private function applyTrends(
-		string $country, string $day, string $type, string $valueType,
-		$current, $previous
+		string $country,
+		string $day,
+		string $type,
+		string $valueType,
+		$current,
+		$previous
 	): void
 	{
 		$positive = self::TREND_POSITIVE;

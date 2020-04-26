@@ -49,12 +49,17 @@ class ChartGenerator
 	 *
 	 * @return Chart
 	 */
-	private function generateChart(array $dataSeriesLabels, array $xAxisTickValues, array $dataSeriesValues, string $title): Chart
+	private function generateChart(
+		array $dataSeriesLabels,
+		array $xAxisTickValues,
+		array $dataSeriesValues,
+		string $title
+	): Chart
 	{
 		$series = new DataSeries(
 			DataSeries::TYPE_SCATTERCHART,
 			null,
-			range(0, count($dataSeriesValues)-1),
+			range(0, count($dataSeriesValues) - 1),
 			$dataSeriesLabels,
 			$xAxisTickValues,
 			$dataSeriesValues,
@@ -86,22 +91,62 @@ class ChartGenerator
 		$range = $lastRow - 1; // excel range
 		$entries = $lastRow - 2; // quantity
 
-		$this->mainDataSeriesValues[] = new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'" . $country . "'" . '!$B$2:$B$' . $range, null, $entries);
+		$this->mainDataSeriesValues[] = new DataSeriesValues(
+			DataSeriesValues::DATASERIES_TYPE_NUMBER,
+			"'" . $country . "'" . '!$B$2:$B$' . $range,
+			null,
+			$entries
+		);
 
 		$dataSeriesLabels = [
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'" . $country . "'" . '!$B$1', null, 1),
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'" . $country . "'" . '!$C$1', null, 1),
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'" . $country . "'" . '!$D$1', null, 1),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_STRING,
+				"'" . $country . "'" . '!$B$1',
+				null,
+				1
+			),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_STRING,
+				"'" . $country . "'" . '!$C$1',
+				null,
+				1
+			),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_STRING,
+				"'" . $country . "'" . '!$D$1',
+				null,
+				1
+			),
 		];
 
 		$xAxisTickValues = [
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_STRING, "'" . $country . "'" . '!$A$2:$A$' . $range, null, $entries),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_STRING,
+				"'" . $country . "'" . '!$A$2:$A$' . $range,
+				null,
+				$entries
+			),
 		];
 
 		$dataSeriesValues = [
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'" . $country . "'" . '!$B$2:$B$' . $range, null, $entries),
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'" . $country . "'" . '!$C$2:$C$' . $range, null, $entries),
-			new DataSeriesValues(DataSeriesValues::DATASERIES_TYPE_NUMBER, "'" . $country . "'" . '!$D$2:$D$' . $range, null, $entries),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_NUMBER,
+				"'" . $country . "'" . '!$B$2:$B$' . $range,
+				null,
+				$entries
+			),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_NUMBER,
+				"'" . $country . "'" . '!$C$2:$C$' . $range,
+				null,
+				$entries
+			),
+			new DataSeriesValues(
+				DataSeriesValues::DATASERIES_TYPE_NUMBER,
+				"'" . $country . "'" . '!$D$2:$D$' . $range,
+				null,
+				$entries
+			),
 		];
 
 		$chart = $this->generateChart(

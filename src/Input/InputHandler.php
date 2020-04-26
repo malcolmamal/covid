@@ -23,17 +23,17 @@ class InputHandler
 	/**
 	 * @var string
 	 */
-	private $baseDataPath = 'https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/';
+	private $baseDataPath;
 
 	/**
 	 * @var string
 	 */
-	private $prefixPath = 'time_series_covid19_';
+	private $prefixPath;
 
 	/**
 	 * @var string
 	 */
-	private $suffixPath = '_global.csv';
+	private $suffixPath;
 
 	/**
 	 * @var Data
@@ -43,6 +43,10 @@ class InputHandler
 	public function __construct()
 	{
 		$this->dataPath = Config::getDataPath();
+
+		$this->baseDataPath = Config::getValue('covid_repository_path');
+		$this->prefixPath = Config::getValue('covid_file_prefix');
+		$this->suffixPath = Config::getValue('covid_file_suffix');
 	}
 
 	/**
