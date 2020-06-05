@@ -98,7 +98,7 @@ class InputHandler
 
 		if (($handle = fopen($filePath, "r")) !== false)
 		{
-			while (($csvData = fgetcsv($handle, 1000, ",")) !== false)
+			while (($csvData = fgetcsv($handle, 2000, ",")) !== false)
 			{
 				if (empty($csvData))
 				{

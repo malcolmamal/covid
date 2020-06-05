@@ -31,6 +31,9 @@
             "composer phpcs",
             "composer psalm",
             "composer phpstan"
-        ]
+        ],
+	"covid": [
+	    "php index.php generate -d"
+	]
     }
 }
